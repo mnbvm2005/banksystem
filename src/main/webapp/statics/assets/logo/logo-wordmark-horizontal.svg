@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="128" viewBox="0 0 520 128" fill="none">
+  <g transform="translate(0,0) scale(1)">
+    <path d="M18 30h43c14 0 22 7 22 18 0 8-4 14-12 17 7 3 11 9 11 18 0 12-9 21-24 21H18" stroke="#0F172A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 55h42c7 0 11-3 11-8s-4-8-11-8H18" stroke="#2563EB" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 80h40c7 0 12-3 12-9 0-5-5-8-12-8H18" stroke="#0F172A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 80v17" stroke="#2563EB" stroke-width="10" stroke-linecap="round"/>
+    <path d="M36 80v17" stroke="#2563EB" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <path d="M118 28v72" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="148" y="58" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="750" fill="#0F172A">Bank<tspan fill="#2563EB">System</tspan></text>
+  <text x="150" y="88" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="14" font-weight="500" letter-spacing="6" fill="#64748B">个人银行综合业务系统</text>
+</svg>

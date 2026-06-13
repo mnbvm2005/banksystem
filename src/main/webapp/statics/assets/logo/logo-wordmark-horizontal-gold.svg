@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="128" viewBox="0 0 390 128" fill="none">
+  <defs>
+    <linearGradient id="metalGold" x1="0" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE6AD"/>
+      <stop offset="0.28" stop-color="#D9A65B"/>
+      <stop offset="0.52" stop-color="#A97632"/>
+      <stop offset="0.76" stop-color="#F2C979"/>
+      <stop offset="1" stop-color="#C28B3C"/>
+    </linearGradient>
+    <linearGradient id="textGold" x1="148" y1="22" x2="420" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF0C8"/>
+      <stop offset="0.28" stop-color="#F0C879"/>
+      <stop offset="0.58" stop-color="#DCA95A"/>
+      <stop offset="1" stop-color="#FFE0A0"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(17 14)">
+    <path d="M22 8H64C82 8 96 22 96 40C96 52 89 63 79 68C91 73 99 84 99 98C99 119 83 135 61 135H22V91H61C70 91 78 84 78 75C78 66 70 60 61 60H22V8Z"
+          fill="url(#metalGold)" transform="scale(0.73)"/>
+    <path d="M22 8L52 38H60C69 38 75 45 75 54C75 62 69 69 60 69H22V49H58C61 49 63 47 63 44C63 41 61 39 58 39H22V8Z"
+          fill="#061322" transform="scale(0.73)"/>
+    <path d="M22 91H58C61 91 63 89 63 86C63 83 61 81 58 81H22V91Z"
+          fill="#061322" transform="scale(0.73)"/>
+    <path d="M22 91V135L44 113V91H22Z"
+          fill="#061322" transform="scale(0.73)"/>
+    <path d="M22 8H64C82 8 96 22 96 40C96 52 89 63 79 68C91 73 99 84 99 98C99 119 83 135 61 135H22V91H61C70 91 78 84 78 75C78 66 70 60 61 60H22V8Z"
+          fill="none" stroke="url(#metalGold)" stroke-width="1.8" transform="scale(0.73)"/>
+  </g>
+  <path d="M118 28v72" stroke="url(#metalGold)" stroke-width="2"/>
+  <text x="148" y="58" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="750" letter-spacing="-1.2" fill="url(#textGold)">BankSystem</text>
+  <text x="150" y="88" font-family="'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="600" letter-spacing="6" fill="#E6B866">个人银行综合业务系统</text>
+</svg>
