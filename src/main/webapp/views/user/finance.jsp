@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css?v=20260614-bg">
 </head>
 <body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
@@ -52,6 +52,8 @@
             <%
                 for (FinancialProduct product : products) {
                     String riskLevel = product.getRiskLevel();
+                    String productName = product.getProductName();
+                    String productType = product.getProductType();
                     String riskBadgeClass = "badge-soft-primary";
                     String statusText = product.getStatus() == 1 ? "Available" : "Paused";
                     String statusBadgeClass = product.getStatus() == 1 ? "badge-soft-success" : "badge-soft-warning";
@@ -68,8 +70,8 @@
                     <span><%= product.getProductCode() %></span>
                     <em class="<%= riskBadgeClass %>"><%= product.getRiskLevel() %></em>
                 </div>
-                <h2><%= product.getProductName() %></h2>
-                <p><%= product.getProductType() %></p>
+                <h2><%= productName %></h2>
+                <p><%= productType %></p>
                 <div class="rate"><%= product.getExpectedAnnualRate() %>%</div>
                 <div class="product-meta">
                     <span>Min ￥<%= product.getMinAmount() %></span>
@@ -86,12 +88,12 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content bank-modal">
                         <div class="modal-header">
-                            <h2 class="modal-title fs-5" id="productTitle<%= product.getId() %>"><%= product.getProductName() %></h2>
+                            <h2 class="modal-title fs-5" id="productTitle<%= product.getId() %>"><%= productName %></h2>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="product-detail-rate"><%= product.getExpectedAnnualRate() %>%</div>
-                            <p>Product Type: <%= product.getProductType() %></p>
+                            <p>Product Type: <%= productType %></p>
                             <p>Product Code: <%= product.getProductCode() %></p>
                             <p>Term: <%= product.getTermDays() %> days</p>
                             <p>Minimum Amount: ￥<%= product.getMinAmount() %></p>

@@ -6,14 +6,18 @@ import banksystem.sqloperation.GetMySQLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     public boolean canConnect() {
         Connection connection = GetMySQLConnection.getConnection();
         if (connection == null) {
@@ -93,6 +97,74 @@ public class UserDao {
         }
     }
 
+    public User createCustomer(Connection connection, String username, String realName, String phone,
+                               String email, String password) throws SQLException {
+        String salt = "SALT_" + Long.toHexString(System.nanoTime()).toUpperCase();
+        String userNo = "U" + System.currentTimeMillis();
+        String passwordHash = sha256(password + salt);
+        String sql = "INSERT INTO users(user_no, username, real_name, id_card_hash, id_card_masked, phone, email, "
+                + "password_hash, password_salt, status, register_time, last_login_time) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'NORMAL', NOW(), NULL)";
+        int userId;
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, userNo);
+            ps.setString(2, username);
+            ps.setString(3, realName);
+            ps.setString(4, sha256(username + phone));
+            ps.setString(5, "Not provided");
+            ps.setString(6, phone);
+            ps.setString(7, email);
+            ps.setString(8, passwordHash);
+            ps.setString(9, salt);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (!keys.next()) {
+                    throw new SQLException("Failed to read generated user id.");
+                }
+                userId = keys.getInt(1);
+            }
+        }
+
+        assignCustomerRole(connection, userId);
+        createDefaultAccount(connection, userId);
+        User user = findById(connection, userId);
+        user.setRoleCodes(findRoleCodes(connection, userId));
+        return user;
+    }
+
+    public User findById(Connection connection, int userId) throws SQLException {
+        String sql = "SELECT * FROM users WHERE user_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUser(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean existsByUsernameOrPhone(String username, String phone) {
+        String sql = "SELECT 1 FROM users WHERE username = ? OR phone = ? LIMIT 1";
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return true;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return true;
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+    }
+
     public List<String> findRoleCodes(int userId) {
         Connection connection = GetMySQLConnection.getConnection();
         if (connection == null) {
@@ -120,6 +192,28 @@ public class UserDao {
             }
         }
         return roleCodes;
+    }
+
+    private void assignCustomerRole(Connection connection, int userId) throws SQLException {
+        String sql = "INSERT INTO user_roles(user_id, role_id) "
+                + "SELECT ?, role_id FROM roles WHERE role_code = 'CUSTOMER' LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void createDefaultAccount(Connection connection, int userId) throws SQLException {
+        String accountNo = "6222" + String.format("%010d", Math.abs(RANDOM.nextInt(1000000000))) + String.format("%04d", userId % 10000);
+        String sql = "INSERT INTO accounts(user_id, branch_id, account_no, account_type, currency, balance, "
+                + "available_balance, frozen_amount, status, open_time) "
+                + "VALUES (?, (SELECT branch_id FROM bank_branches ORDER BY branch_id LIMIT 1), ?, 'SAVING', 'CNY', "
+                + "0.00, 0.00, 0.00, 'NORMAL', NOW())";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, accountNo);
+            ps.executeUpdate();
+        }
     }
 
     private User mapUser(ResultSet rs) throws SQLException {

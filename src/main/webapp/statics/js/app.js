@@ -256,6 +256,46 @@
         });
     }
 
+    function bindTooltips() {
+        if (!window.bootstrap) {
+            return;
+        }
+
+        document.querySelectorAll(".bi-info-circle").forEach(function (icon) {
+            if (icon.getAttribute("title") || icon.getAttribute("data-bs-title")) {
+                return;
+            }
+            var heading = icon.closest("h1, h2, h3");
+            var headingText = heading ? heading.textContent.replace(/\s+/g, " ").trim() : "this section";
+            icon.setAttribute("tabindex", "0");
+            icon.setAttribute("data-bs-toggle", "tooltip");
+            icon.setAttribute("data-bs-title", "More information about " + headingText.replace(/More information about/i, "").trim());
+        });
+
+        document.querySelectorAll("button, a").forEach(function (control) {
+            if (control.getAttribute("title") || control.getAttribute("data-bs-title")) {
+                return;
+            }
+            var label = control.getAttribute("aria-label");
+            if (!label) {
+                return;
+            }
+            control.setAttribute("data-bs-toggle", "tooltip");
+            control.setAttribute("data-bs-title", label);
+        });
+
+        document.querySelectorAll("[data-bs-toggle=\"tooltip\"], [title]").forEach(function (element) {
+            if (element.getAttribute("data-tooltip-bound") === "true") {
+                return;
+            }
+            element.setAttribute("data-tooltip-bound", "true");
+            new bootstrap.Tooltip(element, {
+                container: "body",
+                trigger: "hover focus"
+            });
+        });
+    }
+
     function bindSidebarToggle() {
         var toggle = document.querySelector(".sidebar-toggle");
         if (!toggle) {
@@ -308,6 +348,54 @@
             modal.hide();
             form.submit();
         });
+    }
+
+    function bindRecentPager() {
+        var table = document.querySelector(".js-recent-pager");
+        if (!table) {
+            return;
+        }
+        var rows = Array.prototype.slice.call(table.querySelectorAll(".js-recent-row"));
+        var pageSize = Number(table.getAttribute("data-page-size")) || 3;
+        var pageLabel = document.querySelector(".js-recent-page");
+        var prev = document.querySelector(".js-recent-prev");
+        var next = document.querySelector(".js-recent-next");
+        var page = 0;
+        var totalPages = Math.max(Math.ceil(rows.length / pageSize), 1);
+
+        function render() {
+            rows.forEach(function (row, index) {
+                var visible = index >= page * pageSize && index < (page + 1) * pageSize;
+                row.style.display = visible ? "" : "none";
+            });
+            if (pageLabel) {
+                pageLabel.textContent = (page + 1) + " / " + totalPages;
+            }
+            if (prev) {
+                prev.disabled = page === 0;
+            }
+            if (next) {
+                next.disabled = page >= totalPages - 1;
+            }
+        }
+
+        if (prev) {
+            prev.addEventListener("click", function () {
+                if (page > 0) {
+                    page -= 1;
+                    render();
+                }
+            });
+        }
+        if (next) {
+            next.addEventListener("click", function () {
+                if (page < totalPages - 1) {
+                    page += 1;
+                    render();
+                }
+            });
+        }
+        render();
     }
 
     function createCharts() {
@@ -597,18 +685,30 @@
                             Number(billFlow.getAttribute("data-income")) || 0,
                             Number(billFlow.getAttribute("data-expense")) || 0
                         ],
-                        backgroundColor: ["#16A34A", "#DC2626"],
+                        backgroundColor: ["#07111F", "#D39A2F"],
+                        hoverBackgroundColor: ["#07111F", "#C8942E"],
                         borderRadius: 12,
                         maxBarThickness: 72
                     }]
                 },
                 options: {
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: axisTickFont } },
+                        x: {
+                            grid: { display: false },
+                            border: { color: "rgba(198, 181, 152, 0.75)" },
+                            ticks: { color: "#303845", font: axisTickFont }
+                        },
                         y: {
                             beginAtZero: true,
-                            ticks: { font: axisTickFont, callback: function (value) { return formatYen(value); } }
+                            grid: { color: "rgba(198, 181, 152, 0.46)", borderDash: [4, 4] },
+                            border: { color: "rgba(198, 181, 152, 0.75)" },
+                            ticks: {
+                                color: "#303845",
+                                font: axisTickFont,
+                                callback: function (value) { return formatYen(value); }
+                            }
                         }
                     }
                 }
@@ -644,8 +744,10 @@
         bindTransactionFilters();
         bindGlobalSearch();
         bindPasswordToggle();
+        bindTooltips();
         bindSidebarToggle();
         bindTransferConfirm();
+        bindRecentPager();
         createCharts();
         if (window.location.search.indexOf("success=transfer") >= 0) {
             showToast("Transfer completed. Transaction records have been updated.");

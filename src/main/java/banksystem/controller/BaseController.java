@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class BaseController extends HttpServlet {
-    protected User getLoginUser(HttpServletRequest request) {
+    protected User getLoginUser(javax.servlet.http.HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("loginUser");
         if (user == null) {
             user = (User) request.getSession().getAttribute("user");
@@ -19,14 +19,14 @@ public abstract class BaseController extends HttpServlet {
         return user;
     }
 
-    protected User getLoginUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected User getLoginUser(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) throws IOException {
         if (!requireLogin(request, response)) {
             return null;
         }
         return getLoginUser(request);
     }
 
-    protected Integer getLoginUserId(HttpServletRequest request) {
+    protected Integer getLoginUserId(javax.servlet.http.HttpServletRequest request) {
         Object value = request.getSession().getAttribute("userId");
         if (value instanceof Integer) {
             return (Integer) value;
@@ -36,7 +36,7 @@ public abstract class BaseController extends HttpServlet {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<String> getRoleCodes(HttpServletRequest request) {
+    protected List<String> getRoleCodes(javax.servlet.http.HttpServletRequest request) {
         Object value = request.getSession().getAttribute("roleCodes");
         if (value instanceof List) {
             return (List<String>) value;
@@ -48,7 +48,7 @@ public abstract class BaseController extends HttpServlet {
         return new ArrayList<String>();
     }
 
-    protected boolean requireLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected boolean requireLogin(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) throws IOException {
         User user = getLoginUser(request);
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -62,11 +62,11 @@ public abstract class BaseController extends HttpServlet {
         return true;
     }
 
-    protected boolean hasRole(HttpServletRequest request, String roleCode) {
+    protected boolean hasRole(javax.servlet.http.HttpServletRequest request, String roleCode) {
         return getRoleCodes(request).contains(roleCode);
     }
 
-    protected boolean hasAnyRole(HttpServletRequest request, String... roleCodes) {
+    protected boolean hasAnyRole(javax.servlet.http.HttpServletRequest request, String... roleCodes) {
         List<String> required = Arrays.asList(roleCodes);
         for (String owned : getRoleCodes(request)) {
             if (required.contains(owned)) {
@@ -76,16 +76,16 @@ public abstract class BaseController extends HttpServlet {
         return false;
     }
 
-    protected boolean requireRole(HttpServletRequest request, HttpServletResponse response, String roleCode) throws IOException {
+    protected boolean requireRole(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, String roleCode) throws IOException {
         return requireAnyRole(request, response, roleCode);
     }
 
-    protected boolean requireAnyRole(HttpServletRequest request, HttpServletResponse response, String... roleCodes) throws IOException {
+    protected boolean requireAnyRole(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, String... roleCodes) throws IOException {
         if (!requireLogin(request, response)) {
             return false;
         }
         if (!hasAnyRole(request, roleCodes)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(javax.servlet.http.HttpServletResponse.SC_FORBIDDEN);
             return false;
         }
         return true;

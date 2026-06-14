@@ -21,8 +21,13 @@ public class TransactionController extends BaseController {
             return;
         }
 
-        List<Transaction> transactions = transactionDao.findByUserId(user.getId(), hasRole(request, "ADMIN"));
+        boolean admin = hasRole(request, "ADMIN");
+        List<Transaction> transactions = transactionDao.findByUserId(user.getId(), admin);
         request.setAttribute("transactions", transactions);
+        request.setAttribute("totalTransactions", Integer.valueOf(transactionDao.countVisible(user.getId(), admin)));
+        request.setAttribute("totalInflow", transactionDao.sumLedgerAmount(user.getId(), admin, "IN"));
+        request.setAttribute("totalOutflow", transactionDao.sumLedgerAmount(user.getId(), admin, "OUT"));
+        request.setAttribute("pendingReview", Integer.valueOf(transactionDao.countPendingReview(user.getId(), admin)));
         request.getRequestDispatcher("/views/user/transactions.jsp").forward(request, response);
     }
 }

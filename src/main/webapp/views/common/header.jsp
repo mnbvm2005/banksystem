@@ -31,6 +31,7 @@
     } else if ("/logs".equals(topbarCurrentPath)) {
         topbarPageTitle = "Operation Logs";
     }
+    String displayName = loginUser.getRealName();
 %>
 <div class="dashboard-shell">
     <header class="topbar">
@@ -51,7 +52,7 @@
         <div class="topbar-actions">
             <span class="security-chip"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-shield.svg" alt="">All Systems Operational</span>
             <span class="date-chip" id="currentDate">--</span>
-            <span class="user-chip"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-user.svg" alt=""><%= loginUser.getRealName() %></span>
+            <span class="user-chip"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-user.svg" alt=""><%= displayName %></span>
             <a class="btn btn-outline-danger btn-sm" href="${pageContext.request.contextPath}/logout">
                 <i class="bi bi-box-arrow-right"></i>Sign out
             </a>

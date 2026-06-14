@@ -28,5 +28,5 @@
   </g>
   <path d="M118 28v72" stroke="url(#metalGold)" stroke-width="2"/>
   <text x="148" y="58" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="750" letter-spacing="-1.2" fill="url(#textGold)">BankSystem</text>
-  <text x="150" y="88" font-family="'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="600" letter-spacing="6" fill="#E6B866">个人银行综合业务系统</text>
+  <text x="150" y="88" font-family="'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="600" letter-spacing="6" fill="#E6B866">PERSONAL BANKING SYSTEM</text>
 </svg>

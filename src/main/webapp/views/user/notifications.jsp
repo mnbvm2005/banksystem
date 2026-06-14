@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css?v=20260614-bg">
 </head>
 <body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
@@ -28,10 +28,13 @@
             <table class="table modern-table align-middle">
                 <thead><tr><th>Title</th><th>Content</th><th>Type</th><th>Status</th><th>Create Time</th><th>Read Time</th><th></th></tr></thead>
                 <tbody>
-                <% for (Notification notification : notifications) { %>
+                <% for (Notification notification : notifications) {
+                    String notificationTitle = notification.getTitle();
+                    String notificationContent = notification.getContent();
+                %>
                 <tr>
-                    <td><%= notification.getTitle() %></td>
-                    <td><%= notification.getContent() %></td>
+                    <td><%= notificationTitle %></td>
+                    <td><%= notificationContent %></td>
                     <td><%= notification.getNotificationType() %></td>
                     <td><%= notification.isRead() ? "Read" : "Unread" %></td>
                     <td><%= notification.getCreateTime() %></td>

@@ -38,7 +38,7 @@ CREATE TABLE accounts (
     user_id INT NOT NULL,
     account_number VARCHAR(30) NOT NULL UNIQUE,
     account_type VARCHAR(20) NOT NULL DEFAULT 'SAVINGS',
-    bank_name VARCHAR(100) NOT NULL DEFAULT '个人银行上海分行',
+    bank_name VARCHAR(100) NOT NULL DEFAULT 'Personal Bank Shanghai Branch',
     balance DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     currency VARCHAR(10) NOT NULL DEFAULT 'CNY',
     reserved_phone VARCHAR(20),
@@ -256,13 +256,13 @@ CREATE TABLE notifications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO users (username, password, real_name, phone, id_card, email, status) VALUES
-('1', '1', '测试用户', '1', '110101200001010011', 'test2024110180@example.com', 1),
-('2', '1', '收款用户', '2', '110101200001010029', 'receiver@example.com', 1);
+('1', '1', 'Test User', '1', '110101200001010011', 'test2024110180@example.com', 1),
+('2', '1', 'Receiver User', '2', '110101200001010029', 'receiver@example.com', 1);
 
 INSERT INTO accounts (user_id, account_number, account_type, bank_name, balance, currency, reserved_phone, status) VALUES
-(1, '6222024110180001', '储蓄账户', '个人银行上海分行', 9200.00, 'CNY', '1', 1),
-(1, '6222024110180002', '活期账户', '个人银行上海分行', 3500.50, 'CNY', '1', 1),
-(2, '6222024110181001', '储蓄账户', '个人银行北京分行', 7300.00, 'CNY', '2', 1);
+(1, '6222024110180001', 'SAVING', 'Personal Bank Shanghai Branch', 9200.00, 'CNY', '1', 1),
+(1, '6222024110180002', 'CURRENT', 'Personal Bank Shanghai Branch', 3500.50, 'CNY', '1', 1),
+(2, '6222024110181001', 'SAVING', 'Personal Bank Beijing Branch', 7300.00, 'CNY', '2', 1);
 
 INSERT INTO financial_products (
     product_code,
@@ -274,9 +274,9 @@ INSERT INTO financial_products (
     term_days,
     status
 ) VALUES
-('FP2024001', '稳健收益 30 天', '固定收益类', '低风险', 2.35, 1000.00, 30, 1),
-('FP2024002', '月月盈理财计划', '固定收益类', '中低风险', 3.10, 5000.00, 90, 1),
-('FP2024003', '成长精选混合计划', '混合类', '中风险', 4.80, 10000.00, 180, 1);
+('FP2024001', 'Stable Income 30 Days', 'Fixed Income', 'LOW', 2.35, 1000.00, 30, 1),
+('FP2024002', 'Monthly Income Plan', 'Fixed Income', 'LOW_MEDIUM', 3.10, 5000.00, 90, 1),
+('FP2024003', 'Growth Select Balanced Plan', 'Balanced Fund', 'MEDIUM', 4.80, 10000.00, 180, 1);
 
 INSERT INTO transactions (
     transaction_no,
@@ -288,8 +288,8 @@ INSERT INTO transactions (
     description,
     transaction_time
 ) VALUES
-('TX202405010001', NULL, 1, 'DEPOSIT', 10000.00, 10000.00, '开户存入', '2024-05-01 09:00:00'),
-('TX202405030001', 1, 3, 'TRANSFER_OUT', 500.00, 9500.00, '转账给收款用户', '2024-05-03 14:30:00'),
-('TX202405030002', 1, 3, 'TRANSFER_IN', 500.00, 7300.00, '收到测试用户转账', '2024-05-03 14:30:00'),
-('TX202405060001', NULL, 2, 'DEPOSIT', 3500.50, 3500.50, '活期账户存入', '2024-05-06 10:15:00'),
-('TX202405100001', 1, NULL, 'WITHDRAW', 300.00, 9200.00, 'ATM 取款', '2024-05-10 18:20:00');
+('TX202405010001', NULL, 1, 'DEPOSIT', 10000.00, 10000.00, 'Opening deposit', '2024-05-01 09:00:00'),
+('TX202405030001', 1, 3, 'TRANSFER_OUT', 500.00, 9500.00, 'Transfer to receiver user', '2024-05-03 14:30:00'),
+('TX202405030002', 1, 3, 'TRANSFER_IN', 500.00, 7300.00, 'Transfer received from test user', '2024-05-03 14:30:00'),
+('TX202405060001', NULL, 2, 'DEPOSIT', 3500.50, 3500.50, 'Current account deposit', '2024-05-06 10:15:00'),
+('TX202405100001', 1, NULL, 'WITHDRAW', 300.00, 9200.00, 'ATM withdrawal', '2024-05-10 18:20:00');

@@ -4,25 +4,29 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Locale" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     List<Transaction> transactions = (List<Transaction>) request.getAttribute("transactions");
     String success = request.getParameter("success");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
     DecimalFormat integerFormat = new DecimalFormat("#,##0");
-    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm a");
-    int transactionCount = transactions == null ? 0 : transactions.size();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US);
+    Integer totalTransactionsValue = (Integer) request.getAttribute("totalTransactions");
+    Integer pendingReviewValue = (Integer) request.getAttribute("pendingReview");
+    BigDecimal totalInflowValue = (BigDecimal) request.getAttribute("totalInflow");
+    BigDecimal totalOutflowValue = (BigDecimal) request.getAttribute("totalOutflow");
+    int transactionCount = totalTransactionsValue == null ? (transactions == null ? 0 : transactions.size()) : totalTransactionsValue;
+    int pendingCount = pendingReviewValue == null ? 0 : pendingReviewValue;
+    BigDecimal totalInflow = totalInflowValue == null ? BigDecimal.ZERO : totalInflowValue;
+    BigDecimal totalOutflow = totalOutflowValue == null ? BigDecimal.ZERO : totalOutflowValue;
     int inflowCount = 0;
     int outflowCount = 0;
     int internalCount = 0;
-    int pendingCount = 0;
-    BigDecimal totalInflow = BigDecimal.ZERO;
-    BigDecimal totalOutflow = BigDecimal.ZERO;
     if (transactions != null) {
         for (Transaction transaction : transactions) {
             String type = transaction.getTransactionType();
             String status = transaction.getStatus();
-            BigDecimal amount = transaction.getAmount() == null ? BigDecimal.ZERO : transaction.getAmount();
             boolean isPending = "PENDING".equals(status) || "APPROVING".equals(status);
             boolean isInternal = "TRANSFER".equals(type);
             boolean isOutflow = "WITHDRAW".equals(type) || "PAYMENT".equals(type) || "INVEST_BUY".equals(type) || "TRANSFER".equals(type);
@@ -34,10 +38,8 @@
             }
             if (isOutflow) {
                 outflowCount++;
-                totalOutflow = totalOutflow.add(amount);
             } else {
                 inflowCount++;
-                totalInflow = totalInflow.add(amount);
             }
         }
     }
@@ -56,8 +58,8 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/transactions-fix.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css?v=20260614-bg">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/transactions-fix.css?v=20260614-tx-kpi">
 </head>
 <body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
@@ -73,26 +75,38 @@
     <%
         }
     %>
-    <section class="metric-grid transaction-kpi-grid">
-        <article class="card-kpi metric-card transaction-kpi-card">
-            <span><span class="icon-shell transaction-kpi-icon icon-list" aria-hidden="true"></span><span class="transaction-kpi-title">Total Transactions</span></span>
-            <strong><%= integerFormat.format(transactionCount) %></strong>
-            <small><em class="transaction-kpi-badge">+<%= Math.max(transactionCount, 0) %></em>visible records</small>
+    <section class="tx-kpi-grid">
+        <article class="tx-kpi-card">
+            <div class="tx-kpi-text">
+                <div class="tx-kpi-label">Total Transactions</div>
+                <div class="tx-kpi-value"><%= integerFormat.format(transactionCount) %></div>
+                <div class="tx-kpi-subtitle">visible records</div>
+            </div>
+            <div class="tx-kpi-icon"><i class="bi bi-receipt-cutoff"></i></div>
         </article>
-        <article class="card-kpi metric-card transaction-kpi-card">
-            <span><span class="icon-shell transaction-kpi-icon icon-down" aria-hidden="true"></span><span class="transaction-kpi-title">Total Inflow</span></span>
-            <strong class="transaction-amount-positive">¥<%= moneyFormat.format(totalInflow) %></strong>
-            <small><em class="transaction-kpi-badge">+<%= inflowCount %></em>inbound records</small>
+        <article class="tx-kpi-card">
+            <div class="tx-kpi-text">
+                <div class="tx-kpi-label">Total Inflow</div>
+                <div class="tx-kpi-value">¥<%= moneyFormat.format(totalInflow) %></div>
+                <div class="tx-kpi-subtitle">inbound ledger amount</div>
+            </div>
+            <div class="tx-kpi-icon"><i class="bi bi-arrow-down"></i></div>
         </article>
-        <article class="card-kpi metric-card transaction-kpi-card">
-            <span><span class="icon-shell transaction-kpi-icon icon-up" aria-hidden="true"></span><span class="transaction-kpi-title">Total Outflow</span></span>
-            <strong class="transaction-amount-negative">¥<%= moneyFormat.format(totalOutflow) %></strong>
-            <small><em class="transaction-kpi-badge negative">-<%= outflowCount %></em>outbound records</small>
+        <article class="tx-kpi-card">
+            <div class="tx-kpi-text">
+                <div class="tx-kpi-label">Total Outflow</div>
+                <div class="tx-kpi-value">¥<%= moneyFormat.format(totalOutflow) %></div>
+                <div class="tx-kpi-subtitle">outbound ledger amount</div>
+            </div>
+            <div class="tx-kpi-icon"><i class="bi bi-arrow-up"></i></div>
         </article>
-        <article class="card-kpi metric-card transaction-kpi-card">
-            <span><span class="icon-shell transaction-kpi-icon icon-clock" aria-hidden="true"></span><span class="transaction-kpi-title">Pending Review</span></span>
-            <strong><%= pendingCount %></strong>
-            <small><em class="transaction-kpi-badge">+<%= pendingCount %></em>awaiting action</small>
+        <article class="tx-kpi-card">
+            <div class="tx-kpi-text">
+                <div class="tx-kpi-label">Pending Review</div>
+                <div class="tx-kpi-value"><%= integerFormat.format(pendingCount) %></div>
+                <div class="tx-kpi-subtitle">awaiting action</div>
+            </div>
+            <div class="tx-kpi-icon"><i class="bi bi-clock-history"></i></div>
         </article>
     </section>
 
@@ -135,7 +149,7 @@
             </div>
         </div>
         <aside class="transaction-overview-panel">
-            <h2>Transaction Overview <i class="bi bi-info-circle"></i></h2>
+            <h2>Transaction Overview <i class="bi bi-info-circle" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Shows the share of inflow, outflow, and internal transfer records in the current result set."></i></h2>
             <div class="transaction-overview-body">
                 <canvas id="transactionTypeChart" height="132"
                         data-inflow="<%= inflowCount %>"
@@ -153,7 +167,7 @@
 
     <section class="transaction-ledger-panel">
         <div class="transaction-ledger-heading">
-            <h2>Transaction Ledger <i class="bi bi-info-circle"></i></h2>
+            <h2>Transaction Ledger <i class="bi bi-info-circle" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Lists every visible transaction with status, risk level, amount, date, and black box details."></i></h2>
         </div>
         <%
             if (transactions == null || transactions.isEmpty()) {
@@ -232,14 +246,14 @@
         <div class="transaction-pagination">
             <span>Showing 1 to <%= transactionCount %> of <%= integerFormat.format(transactionCount) %> results</span>
             <div>
-                <button type="button"><i class="bi bi-chevron-double-left"></i></button>
-                <button type="button"><i class="bi bi-chevron-left"></i></button>
+                <button type="button" aria-label="First page"><i class="bi bi-chevron-double-left"></i></button>
+                <button type="button" aria-label="Previous page"><i class="bi bi-chevron-left"></i></button>
                 <button class="active" type="button">1</button>
                 <button type="button">2</button>
                 <button type="button">3</button>
                 <span>...</span>
-                <button type="button"><i class="bi bi-chevron-right"></i></button>
-                <button type="button"><i class="bi bi-chevron-double-right"></i></button>
+                <button type="button" aria-label="Next page"><i class="bi bi-chevron-right"></i></button>
+                <button type="button" aria-label="Last page"><i class="bi bi-chevron-double-right"></i></button>
             </div>
             <label>Rows per page <select><option>10</option><option>25</option></select></label>
         </div>

@@ -3,6 +3,7 @@ package banksystem.dao;
 import banksystem.model.Transaction;
 import banksystem.sqloperation.GetMySQLConnection;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionDao {
+    public int countVisible(int userId, boolean admin) {
+        String sql = admin ? "SELECT COUNT(*) FROM transactions" : "SELECT COUNT(*) FROM transactions WHERE user_id = ?";
+        return queryInt(sql, admin ? null : Integer.valueOf(userId));
+    }
+
+    public int countPendingReview(int userId, boolean admin) {
+        String sql = admin
+                ? "SELECT COUNT(*) FROM transactions WHERE status IN ('PENDING','APPROVING')"
+                : "SELECT COUNT(*) FROM transactions WHERE user_id = ? AND status IN ('PENDING','APPROVING')";
+        return queryInt(sql, admin ? null : Integer.valueOf(userId));
+    }
+
+    public BigDecimal sumLedgerAmount(int userId, boolean admin, String direction) {
+        String sql = "SELECT COALESCE(SUM(le.amount), 0) "
+                + "FROM ledger_entries le "
+                + "JOIN accounts a ON le.account_id = a.account_id "
+                + (admin ? "WHERE le.direction = ? " : "WHERE le.direction = ? AND a.user_id = ? ");
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return BigDecimal.ZERO;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, direction);
+            if (!admin) {
+                ps.setInt(2, userId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal value = rs.getBigDecimal(1);
+                    return value == null ? BigDecimal.ZERO : value;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+        return BigDecimal.ZERO;
+    }
+
     public List<Transaction> findByUserId(int userId) {
         return findByUserId(userId, false);
     }
@@ -108,6 +149,28 @@ public class TransactionDao {
             return "TRANSFER";
         }
         return type;
+    }
+
+    private int queryInt(String sql, Integer userId) {
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return 0;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            if (userId != null) {
+                ps.setInt(1, userId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+        return 0;
     }
 
     private Integer getNullableInt(ResultSet rs, String columnName) throws SQLException {

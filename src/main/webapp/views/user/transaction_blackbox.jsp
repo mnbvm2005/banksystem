@@ -2,6 +2,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     TransactionBlackBox blackBox = (TransactionBlackBox) request.getAttribute("blackBox");
+    String blackBoxDisplayName = blackBox == null ? "" : blackBox.getRealName();
+    String ledgerTrace = blackBox == null ? null : blackBox.getLedgerTrace();
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +14,7 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css?v=20260614-bg">
 </head>
 <body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
@@ -43,14 +45,14 @@
                 <p><span class="badge-soft-primary"><%= blackBox.getTransactionType() %></span></p>
                 <p>Amount: ￥<%= blackBox.getAmount() %></p>
                 <p>Status: <span class="badge-soft-success"><%= blackBox.getTransactionStatus() %></span></p>
-                <p>Initiator: <%= blackBox.getRealName() %> (<%= blackBox.getUsername() %>)</p>
+                <p>Initiator: <%= blackBoxDisplayName %> (<%= blackBox.getUsername() %>)</p>
                 <p>Created: <%= blackBox.getCreateTime() %></p>
             </article>
         </div>
         <div class="col-lg-8">
             <article class="panel h-100">
                 <div class="panel-heading"><h2>Fund Movement</h2></div>
-                <p><%= blackBox.getLedgerTrace() == null ? "No ledger entry is available." : blackBox.getLedgerTrace() %></p>
+                <p><%= ledgerTrace == null ? "No ledger entry is available." : ledgerTrace %></p>
             </article>
         </div>
         <div class="col-md-4">
