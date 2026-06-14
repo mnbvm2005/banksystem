@@ -1,11 +1,15 @@
 package banksystem.dao;
 
 import banksystem.model.TransactionValidation;
+import banksystem.sqloperation.GetMySQLConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TransactionValidationDao {
     public void add(Connection connection, TransactionValidation validation) throws SQLException {
@@ -30,5 +34,35 @@ public class TransactionValidationDao {
         } else {
             ps.setInt(index, value);
         }
+    }
+
+    public List<TransactionValidation> findAll() {
+        List<TransactionValidation> rows = new ArrayList<TransactionValidation>();
+        String sql = "SELECT * FROM transaction_validations ORDER BY validation_time DESC, validation_id DESC";
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return rows;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                TransactionValidation row = new TransactionValidation();
+                row.setValidationId(rs.getInt("validation_id"));
+                int transactionId = rs.getInt("transaction_id");
+                row.setTransactionId(rs.wasNull() ? null : Integer.valueOf(transactionId));
+                row.setAccountStatusValid(rs.getInt("account_status_ok") == 1);
+                row.setBalanceSufficient(rs.getInt("balance_ok") == 1);
+                row.setAmountValid(rs.getInt("amount_ok") == 1);
+                row.setTargetAccountValid(rs.getInt("limit_ok") == 1);
+                row.setValidationResult(rs.getString("validation_result"));
+                row.setRejectReason(rs.getString("fail_reason"));
+                row.setValidationTime(rs.getTimestamp("validation_time"));
+                rows.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+        return rows;
     }
 }

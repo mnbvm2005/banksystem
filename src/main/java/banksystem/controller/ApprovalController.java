@@ -27,7 +27,9 @@ public class ApprovalController extends BaseController {
         if (!requireAnyRole(request, response, "ADMIN", "APPROVER")) {
             return;
         }
+        boolean canApprove = true;
         List<TransactionApproval> approvals = approvalDao.findPending();
+        request.setAttribute("canApprove", Boolean.valueOf(canApprove));
         request.setAttribute("approvals", approvals);
         request.getRequestDispatcher("/views/user/approval.jsp").forward(request, response);
     }

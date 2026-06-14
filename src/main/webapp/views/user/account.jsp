@@ -1,10 +1,12 @@
 <%@ page import="banksystem.model.Account" %>
+<%@ page import="banksystem.model.AccountStatusHistory" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     List<Account> accounts = (List<Account>) request.getAttribute("accounts");
+    List<AccountStatusHistory> recentStatusHistories = (List<AccountStatusHistory>) request.getAttribute("recentStatusHistories");
     BigDecimal totalBalance = BigDecimal.ZERO;
     DecimalFormat accountMoneyFormat = new DecimalFormat("#,##0.00");
     int accountCount = accounts == null ? 0 : accounts.size();
@@ -166,6 +168,54 @@
                     <td><span class="<%= account.getStatus() == 1 ? "badge-soft-success" : "badge-soft-warning" %>"><%= account.getStatus() == 1 ? "Active" : "Frozen" %></span></td>
                     <td><%= account.getBankName() %></td>
                     <td><%= account.getOpenedAt() == null ? "-" : account.getOpenedAt() %></td>
+                </tr>
+                <%
+                    }
+                %>
+                </tbody>
+            </table>
+        </div>
+        <%
+            }
+        %>
+    </section>
+
+    <section class="panel mt-3">
+        <div class="panel-heading">
+            <h2>Recent Status History</h2>
+        </div>
+        <%
+            if (recentStatusHistories == null || recentStatusHistories.isEmpty()) {
+        %>
+        <div class="empty-state compact">
+            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-calendar.svg" alt="">
+            <h3>No recent status updates</h3>
+            <p>Freeze, unfreeze, or lifecycle changes will appear here.</p>
+        </div>
+        <%
+            } else {
+        %>
+        <div class="table-responsive">
+            <table class="table modern-table align-middle">
+                <thead>
+                <tr>
+                    <th>Account ID</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Reason</th>
+                    <th>Changed At</th>
+                </tr>
+                </thead>
+                <tbody>
+                <%
+                    for (AccountStatusHistory history : recentStatusHistories) {
+                %>
+                <tr>
+                    <td><%= history.getAccountId() %></td>
+                    <td><%= history.getOldStatus() == null ? "-" : history.getOldStatus() %></td>
+                    <td><span class="badge-soft-primary"><%= history.getNewStatus() %></span></td>
+                    <td><%= history.getChangeReason() == null ? "-" : history.getChangeReason() %></td>
+                    <td><%= history.getChangeTime() == null ? "-" : history.getChangeTime() %></td>
                 </tr>
                 <%
                     }

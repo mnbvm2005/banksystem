@@ -30,6 +30,8 @@
         topbarPageTitle = "Approval";
     } else if ("/logs".equals(topbarCurrentPath)) {
         topbarPageTitle = "Operation Logs";
+    } else if ("/admin".equals(topbarCurrentPath)) {
+        topbarPageTitle = "Admin Center";
     }
     String displayName = loginUser.getRealName();
 %>

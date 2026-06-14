@@ -11,6 +11,7 @@ public class AuthRecord {
     private String failureReason;
     private Date authTime;
     private String loginIp;
+    private String deviceFingerprint;
 
     public int getAuthId() {
         return authId;
@@ -74,5 +75,13 @@ public class AuthRecord {
 
     public void setLoginIp(String loginIp) {
         this.loginIp = loginIp;
+    }
+
+    public String getDeviceFingerprint() {
+        return deviceFingerprint;
+    }
+
+    public void setDeviceFingerprint(String deviceFingerprint) {
+        this.deviceFingerprint = deviceFingerprint;
     }
 }

@@ -49,7 +49,7 @@ body.app-body.ambient-page .transaction-hero p {
 .tx-kpi-text {
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    padding-right: 18px !important;
+    padding-right: 22px !important;
 }
 
 .tx-kpi-label {
@@ -77,6 +77,11 @@ body.app-body.ambient-page .transaction-hero p {
     line-height: 1 !important;
     letter-spacing: 0 !important;
     white-space: nowrap !important;
+}
+
+.tx-kpi-card:nth-child(2) .tx-kpi-value,
+.tx-kpi-card:nth-child(3) .tx-kpi-value {
+    font-size: clamp(1.72rem, 1.95vw, 2.32rem) !important;
 }
 
 .tx-kpi-subtitle {

@@ -4,13 +4,19 @@ import banksystem.dao.AccountDao;
 import banksystem.dao.LedgerEntryDao;
 import banksystem.dao.NotificationDao;
 import banksystem.dao.OperationLogDao;
+import banksystem.dao.SecurityEventDao;
 import banksystem.dao.TransactionDao;
+import banksystem.dao.TransactionLimitRuleDao;
+import banksystem.dao.TransactionRiskScoreDao;
 import banksystem.dao.TransactionValidationDao;
 import banksystem.model.Account;
 import banksystem.model.LedgerEntry;
 import banksystem.model.Notification;
 import banksystem.model.OperationLog;
+import banksystem.model.SecurityEvent;
 import banksystem.model.Transaction;
+import banksystem.model.TransactionLimitRule;
+import banksystem.model.TransactionRiskScore;
 import banksystem.model.TransactionValidation;
 import banksystem.sqloperation.GetMySQLConnection;
 
@@ -32,6 +38,9 @@ public abstract class MoneyOperationController extends BaseController {
     protected final OperationLogDao operationLogDao = new OperationLogDao();
     protected final NotificationDao notificationDao = new NotificationDao();
     protected final TransactionValidationDao transactionValidationDao = new TransactionValidationDao();
+    protected final SecurityEventDao securityEventDao = new SecurityEventDao();
+    protected final TransactionLimitRuleDao transactionLimitRuleDao = new TransactionLimitRuleDao();
+    protected final TransactionRiskScoreDao transactionRiskScoreDao = new TransactionRiskScoreDao();
 
     protected BigDecimal parsePositiveAmount(String amountText) {
         try {
@@ -148,6 +157,69 @@ public abstract class MoneyOperationController extends BaseController {
         notification.setContent(content);
         notification.setNotificationType(type);
         return notification;
+    }
+
+    protected TransactionLimitRule resolveLimitRule(HttpServletRequest request, String transactionType) {
+        for (String roleCode : getRoleCodes(request)) {
+            TransactionLimitRule rule = transactionLimitRuleDao.findActiveRule(roleCode, transactionType);
+            if (rule != null) {
+                return rule;
+            }
+        }
+        return transactionLimitRuleDao.findActiveRule("CUSTOMER", transactionType);
+    }
+
+    protected void enforceLimitRule(TransactionLimitRule rule, BigDecimal amount, String transactionType) {
+        if (rule == null) {
+            return;
+        }
+        if (amount.compareTo(rule.getSingleLimit()) > 0) {
+            throw new IllegalArgumentException(transactionType + " amount exceeds the single transaction limit.");
+        }
+    }
+
+    protected void writeFrozenSecurityEvent(Connection connection, int userId, String action,
+                                            HttpServletRequest request) throws SQLException {
+        securityEventDao.add(connection, buildSecurityEvent(userId, "FROZEN_ACCOUNT_" + action, "HIGH",
+                "A frozen account attempted to perform " + action.toLowerCase() + ".", request));
+    }
+
+    protected SecurityEvent buildSecurityEvent(int userId, String eventType, String riskLevel,
+                                               String description, HttpServletRequest request) {
+        SecurityEvent event = new SecurityEvent();
+        event.setUserId(userId);
+        event.setEventType(eventType);
+        event.setRiskLevel(riskLevel);
+        event.setDescription(description);
+        event.setIpAddress(request.getRemoteAddr());
+        event.setDeviceFingerprint(buildDeviceFingerprint(request));
+        event.setHandledFlag(0);
+        return event;
+    }
+
+    protected void writeRiskScore(Connection connection, int transactionId, BigDecimal amount,
+                                  TransactionLimitRule rule, boolean knownPayee) throws SQLException {
+        int score = knownPayee ? 12 : 28;
+        int ruleHitCount = 0;
+        String level = "LOW";
+        String reason = knownPayee ? "VERIFIED_PAYEE" : "NEW_COUNTERPARTY";
+        if (rule != null && amount.compareTo(rule.getApprovalThreshold()) >= 0) {
+            score = Math.max(score, 72);
+            ruleHitCount = 1;
+            level = "HIGH";
+            reason = "APPROVAL_THRESHOLD_REACHED";
+        } else if (amount.compareTo(new BigDecimal("10000")) >= 0) {
+            score = Math.max(score, 48);
+            level = "MEDIUM";
+            reason = "LARGE_AMOUNT";
+        }
+        TransactionRiskScore riskScore = new TransactionRiskScore();
+        riskScore.setTransactionId(transactionId);
+        riskScore.setRiskScore(score);
+        riskScore.setRiskLevel(level);
+        riskScore.setRiskReason(reason);
+        riskScore.setRuleHitCount(ruleHitCount);
+        transactionRiskScoreDao.add(connection, riskScore);
     }
 
     protected String normalizeRemark(String remark, String defaultValue) {

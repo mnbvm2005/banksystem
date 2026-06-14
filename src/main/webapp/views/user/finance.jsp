@@ -1,8 +1,13 @@
+<%@ page import="banksystem.model.Account" %>
 <%@ page import="banksystem.model.FinancialProduct" %>
+<%@ page import="banksystem.model.RiskAssessment" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     List<FinancialProduct> products = (List<FinancialProduct>) request.getAttribute("products");
+    List<Account> accounts = (List<Account>) request.getAttribute("accounts");
+    RiskAssessment latestRiskAssessment = (RiskAssessment) request.getAttribute("latestRiskAssessment");
+    String error = (String) request.getAttribute("error");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,8 +35,29 @@
         <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-warning.svg" alt="">
         <div>
             <strong>Investment products involve risk.</strong>
-            <p>This prototype does not implement real subscriptions, redemptions, or suitability assessments.</p>
+            <p>Purchases are checked against your risk profile, available balance, and product minimum amount.</p>
         </div>
+    </section>
+    <% if (error != null && error.length() > 0) { %>
+    <div class="alert alert-danger alert-modern"><i class="bi bi-exclamation-triangle"></i><%= error %></div>
+    <% } %>
+    <section class="panel mb-4">
+        <div class="panel-heading"><h2>Risk Assessment</h2></div>
+        <% if (latestRiskAssessment == null) { %>
+        <div class="empty-state compact">
+            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-warning.svg" alt="">
+            <h3>No valid risk assessment</h3>
+            <p>Please complete a risk assessment before purchasing wealth products.</p>
+            <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/risk">Open Risk Profile</a>
+        </div>
+        <% } else { %>
+        <div class="d-flex flex-wrap gap-4 align-items-center">
+            <div><span class="text-muted d-block">Score</span><strong><%= latestRiskAssessment.getScore() %></strong></div>
+            <div><span class="text-muted d-block">Level</span><strong><%= latestRiskAssessment.getRiskLevel() %></strong></div>
+            <div><span class="text-muted d-block">Valid Until</span><strong><%= latestRiskAssessment.getValidUntil() %></strong></div>
+            <a class="btn btn-light btn-sm ms-auto" href="${pageContext.request.contextPath}/risk">View Details</a>
+        </div>
+        <% } %>
     </section>
     <section>
         <%
@@ -98,9 +124,33 @@
                             <p>Term: <%= product.getTermDays() %> days</p>
                             <p>Minimum Amount: ￥<%= product.getMinAmount() %></p>
                             <p>Risk Level: <span class="<%= riskBadgeClass %>"><%= product.getRiskLevel() %></span></p>
-                            <p>Suitable For: demo users with basic risk awareness.</p>
+                            <p>Suitable For: users whose risk profile is at least <%= product.getRiskLevel() %>.</p>
                             <p>Risk Notice: expected return is prototype data and does not represent a real promise.</p>
-                            <small>This prototype does not implement real subscription, redemption, suitability, or disclosure workflows.</small>
+                            <% if (latestRiskAssessment == null) { %>
+                            <div class="alert alert-warning alert-modern"><i class="bi bi-shield-exclamation"></i>Please complete a risk assessment before purchase.</div>
+                            <% } else if (accounts == null || accounts.isEmpty()) { %>
+                            <div class="alert alert-warning alert-modern"><i class="bi bi-wallet2"></i>No payment account is available.</div>
+                            <% } else { %>
+                            <form action="${pageContext.request.contextPath}/finance" method="post" class="mt-3">
+                                <input type="hidden" name="productId" value="<%= product.getId() %>">
+                                <div class="form-group">
+                                    <label for="financeAccount<%= product.getId() %>">Payment Account</label>
+                                    <select class="form-select" id="financeAccount<%= product.getId() %>" name="accountId" required>
+                                        <% for (Account account : accounts) { %>
+                                        <option value="<%= account.getId() %>"><%= account.getAccountNo() %> - ￥<%= account.getBalance() %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="financeAmount<%= product.getId() %>">Purchase Amount</label>
+                                    <input class="form-control amount-input" id="financeAmount<%= product.getId() %>" name="amount" type="number"
+                                           min="<%= product.getMinAmount() %>" step="0.01" value="<%= product.getMinAmount() %>" required>
+                                </div>
+                                <button class="btn btn-primary-gradient w-100" type="submit">
+                                    <i class="bi bi-check2-circle"></i>Confirm Purchase
+                                </button>
+                            </form>
+                            <% } %>
                         </div>
                     </div>
                 </div>

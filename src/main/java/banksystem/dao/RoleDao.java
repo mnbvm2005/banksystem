@@ -13,14 +13,19 @@ import java.util.List;
 public class RoleDao {
     public List<Role> findAll() {
         List<Role> rows = new ArrayList<Role>();
-        String sql = "SELECT * FROM roles ORDER BY role_id DESC";
+        String sql = "SELECT * FROM roles ORDER BY role_id ASC";
         Connection connection = GetMySQLConnection.getConnection();
         if (connection == null) {
             return rows;
         }
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                rows.add(new Role());
+                Role role = new Role();
+                role.setRoleId(rs.getInt("role_id"));
+                role.setRoleCode(rs.getString("role_code"));
+                role.setRoleName(rs.getString("role_name"));
+                role.setDescription(rs.getString("description"));
+                rows.add(role);
             }
         } catch (SQLException e) {
             e.printStackTrace();

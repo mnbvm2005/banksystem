@@ -1,6 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String sidebarCurrentPath = request.getServletPath();
+    java.util.List<String> sidebarRoleCodes = (java.util.List<String>) session.getAttribute("roleCodes");
+    if (sidebarRoleCodes == null) {
+        sidebarRoleCodes = new java.util.ArrayList<String>();
+    }
+    boolean sidebarAdmin = sidebarRoleCodes.contains("ADMIN");
+    boolean sidebarApprover = sidebarRoleCodes.contains("APPROVER") || sidebarAdmin;
 %>
 <aside class="sidebar">
     <div class="sidebar-title logo-area">
@@ -16,7 +22,7 @@
     </div>
     <nav class="sidebar-menu">
         <span class="sidebar-section">Core</span>
-        <a class="<%= "/index".equals(sidebarCurrentPath) || "/dashboard".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/index">
+        <a class="<%= "/index".equals(sidebarCurrentPath) || "/dashboard".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/dashboard">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-dashboard.svg" alt=""><span>Dashboard</span>
         </a>
         <a class="<%= "/account".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/account">
@@ -26,12 +32,6 @@
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-transactions.svg" alt=""><span>Transactions</span>
         </a>
         <span class="sidebar-section">Money</span>
-        <a class="<%= "/deposit".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/deposit">
-            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-success.svg" alt=""><span>Deposit</span>
-        </a>
-        <a class="<%= "/withdraw".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/withdraw">
-            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-warning.svg" alt=""><span>Withdraw</span>
-        </a>
         <a class="<%= "/transfer".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/transfer">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-transfer.svg" alt=""><span>Transfer</span>
         </a>
@@ -51,11 +51,18 @@
         <a class="<%= "/notifications".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/notifications">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-shield.svg" alt=""><span>Notifications</span>
         </a>
+        <% if (sidebarApprover) { %>
+        <a class="<%= "/approval".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/approval">
+            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-pending.svg" alt=""><span>Approval Center</span>
+        </a>
+        <% } %>
+        <% if (sidebarAdmin) { %>
+        <a class="<%= "/admin".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin">
+            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-filter.svg" alt=""><span>Admin Center</span>
+        </a>
+        <% } %>
         <a class="<%= "/logs".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/logs">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-filter.svg" alt=""><span>Logs</span>
-        </a>
-        <a class="<%= "/approval".equals(sidebarCurrentPath) ? "active" : "" %>" href="${pageContext.request.contextPath}/approval">
-            <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-pending.svg" alt=""><span>Approval</span>
         </a>
     </nav>
     <div class="sidebar-note">

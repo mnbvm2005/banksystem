@@ -1,6 +1,8 @@
 package banksystem.controller;
 
 import banksystem.dao.TransactionDao;
+import banksystem.dao.SavedQueryDao;
+import banksystem.model.SavedQuery;
 import banksystem.model.Transaction;
 import banksystem.model.User;
 
@@ -12,6 +14,7 @@ import java.util.List;
 
 public class TransactionController extends BaseController {
     private final TransactionDao transactionDao = new TransactionDao();
+    private final SavedQueryDao savedQueryDao = new SavedQueryDao();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,7 +26,9 @@ public class TransactionController extends BaseController {
 
         boolean admin = hasRole(request, "ADMIN");
         List<Transaction> transactions = transactionDao.findByUserId(user.getId(), admin);
+        List<SavedQuery> savedQueries = savedQueryDao.findByUserIdAndType(user.getId(), "TRANSACTION");
         request.setAttribute("transactions", transactions);
+        request.setAttribute("savedTransactionQueries", savedQueries);
         request.setAttribute("totalTransactions", Integer.valueOf(transactionDao.countVisible(user.getId(), admin)));
         request.setAttribute("totalInflow", transactionDao.sumLedgerAmount(user.getId(), admin, "IN"));
         request.setAttribute("totalOutflow", transactionDao.sumLedgerAmount(user.getId(), admin, "OUT"));

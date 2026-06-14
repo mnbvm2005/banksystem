@@ -23,7 +23,7 @@ public class TransactionBlackBoxController extends BaseController {
         try {
             transactionId = Integer.parseInt(request.getParameter("transactionId"));
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing transactionId.");
+            response.sendRedirect(request.getContextPath() + "/transactions?notice=select-blackbox");
             return;
         }
         TransactionBlackBox blackBox = blackBoxDao.findByTransactionId(transactionId);

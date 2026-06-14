@@ -6,6 +6,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,5 +92,74 @@ public abstract class BaseController extends HttpServlet {
             return false;
         }
         return true;
+    }
+
+    protected String trim(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    protected String detectBrowser(HttpServletRequest request) {
+        String userAgent = safeUserAgent(request);
+        if (userAgent.contains("Edg/")) {
+            return "Edge";
+        }
+        if (userAgent.contains("Chrome/")) {
+            return "Chrome";
+        }
+        if (userAgent.contains("Safari/") && !userAgent.contains("Chrome/")) {
+            return "Safari";
+        }
+        if (userAgent.contains("Firefox/")) {
+            return "Firefox";
+        }
+        return "Unknown Browser";
+    }
+
+    protected String detectOs(HttpServletRequest request) {
+        String userAgent = safeUserAgent(request);
+        if (userAgent.contains("Mac OS X")) {
+            return "macOS";
+        }
+        if (userAgent.contains("Windows")) {
+            return "Windows";
+        }
+        if (userAgent.contains("Android")) {
+            return "Android";
+        }
+        if (userAgent.contains("iPhone") || userAgent.contains("iPad")) {
+            return "iOS";
+        }
+        if (userAgent.contains("Linux")) {
+            return "Linux";
+        }
+        return "Unknown OS";
+    }
+
+    protected String buildDeviceName(HttpServletRequest request) {
+        return detectBrowser(request) + " on " + detectOs(request);
+    }
+
+    protected String buildDeviceFingerprint(HttpServletRequest request) {
+        String raw = request.getRemoteAddr() + "|" + safeUserAgent(request);
+        return sha256(raw).substring(0, 32);
+    }
+
+    private String safeUserAgent(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        return userAgent == null ? "unknown-agent" : userAgent;
+    }
+
+    private String sha256(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("The current JRE does not support SHA-256.", e);
+        }
     }
 }

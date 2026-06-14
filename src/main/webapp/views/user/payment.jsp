@@ -27,13 +27,19 @@
             <p>Submit utility payment and record payment details in the backend.</p>
         </div>
     </section>
-    <section class="transfer-layout transfer-centered">
+    <section class="transfer-layout payment-centered-layout">
         <div class="panel transfer-panel">
             <div class="panel-heading"><div><h2>Payment Details</h2><p class="panel-subtitle">Payment deducts account balance and writes payment record, ledger, and logs.</p></div></div>
+            <div class="mb-3">
+                <a class="btn btn-light btn-sm" href="http://localhost:8080/CommunityPay/bills">
+                    <i class="bi bi-box-arrow-up-right"></i>打开上财小区生活缴费
+                </a>
+            </div>
             <% if (error != null && error.length() > 0) { %>
             <div class="alert alert-danger alert-modern"><i class="bi bi-exclamation-triangle"></i><%= error %></div>
             <% } %>
             <% if (accounts == null || accounts.isEmpty()) { %>
+            <div class="alert alert-danger alert-modern"><i class="bi bi-exclamation-triangle"></i>当前用户没有可用付款账户，无法缴费。请先导入或创建测试账户。</div>
             <div class="empty-state"><h3>No account available</h3><p>Please import demo database first.</p></div>
             <% } else { %>
             <form action="${pageContext.request.contextPath}/payment" method="post">
@@ -51,7 +57,7 @@
                         <option value="WATER">Water</option>
                         <option value="ELECTRICITY">Electricity</option>
                         <option value="GAS">Gas</option>
-                        <option value="MOBILE">Mobile</option>
+                        <option value="PHONE">Mobile</option>
                     </select>
                 </div>
                 <div class="form-group">

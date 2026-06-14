@@ -4,14 +4,22 @@ import banksystem.dao.AccountDao;
 import banksystem.dao.LedgerEntryDao;
 import banksystem.dao.NotificationDao;
 import banksystem.dao.OperationLogDao;
+import banksystem.dao.PayeeDao;
+import banksystem.dao.SecurityEventDao;
 import banksystem.dao.TransactionDao;
+import banksystem.dao.TransactionLimitRuleDao;
+import banksystem.dao.TransactionRiskScoreDao;
 import banksystem.dao.TransferRecordDao;
 import banksystem.dao.UserDao;
 import banksystem.model.Account;
 import banksystem.model.LedgerEntry;
 import banksystem.model.Notification;
 import banksystem.model.OperationLog;
+import banksystem.model.Payee;
+import banksystem.model.SecurityEvent;
 import banksystem.model.Transaction;
+import banksystem.model.TransactionLimitRule;
+import banksystem.model.TransactionRiskScore;
 import banksystem.model.TransferRecord;
 import banksystem.model.User;
 import banksystem.sqloperation.GetMySQLConnection;
@@ -35,6 +43,10 @@ public class TransferController extends BaseController {
     private final OperationLogDao operationLogDao = new OperationLogDao();
     private final NotificationDao notificationDao = new NotificationDao();
     private final UserDao userDao = new UserDao();
+    private final PayeeDao payeeDao = new PayeeDao();
+    private final TransactionLimitRuleDao transactionLimitRuleDao = new TransactionLimitRuleDao();
+    private final TransactionRiskScoreDao transactionRiskScoreDao = new TransactionRiskScoreDao();
+    private final SecurityEventDao securityEventDao = new SecurityEventDao();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,7 +74,7 @@ public class TransferController extends BaseController {
         try {
             BigDecimal amount = new BigDecimal(amountText);
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                request.setAttribute("error", "Transfer amount must be greater than 0.");
+                request.setAttribute("error", "转账金额必须大于 0。");
                 loadTransferPage(request, response, user);
                 return;
             }
@@ -70,7 +82,7 @@ public class TransferController extends BaseController {
             transfer(user, toAccountNo, amount, remark, request);
             response.sendRedirect(request.getContextPath() + "/transactions?success=transfer");
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid transfer amount format.");
+            request.setAttribute("error", "转账金额格式不正确。");
             loadTransferPage(request, response, user);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
@@ -91,12 +103,21 @@ public class TransferController extends BaseController {
             connection.setAutoCommit(false);
             Account fromAccount = accountDao.findMainAccountByUserId(user.getId());
             if (fromAccount == null) {
-                throw new IllegalArgumentException("The current user has no available payment account.");
+                throw new IllegalArgumentException("当前用户没有可用付款账户，无法转账。");
             }
 
             fromAccount = accountDao.findByIdForUpdate(connection, fromAccount.getId());
             Account toAccount = accountDao.findByAccountNoForUpdate(connection, toAccountNo);
+            TransactionLimitRule limitRule = resolveLimitRule(request, "TRANSFER");
+            enforceLimitRule(limitRule, amount);
+            if (fromAccount != null && !fromAccount.isNormal()) {
+                securityEventDao.add(connection, buildSecurityEvent(user.getId(), "FROZEN_ACCOUNT_TRANSFER", "HIGH",
+                        "A frozen account attempted to transfer funds.",
+                        request.getRemoteAddr(), buildDeviceFingerprint(request)));
+                throw new IllegalArgumentException("付款账户状态异常，无法转账。");
+            }
             validateTransfer(fromAccount, toAccount, amount);
+            Payee existingPayee = payeeDao.findByUserIdAndAccountNo(user.getId(), toAccountNo);
 
             BigDecimal fromBalanceBefore = fromAccount.getBalance();
             BigDecimal toBalanceBefore = toAccount.getBalance();
@@ -124,13 +145,22 @@ public class TransferController extends BaseController {
             transferRecord.setToAccountId(toAccount.getId());
             transferRecord.setPayerAccountNo(fromAccount.getAccountNo());
             transferRecord.setPayeeAccountNo(toAccount.getAccountNo());
-            User payee = userDao.findById(toAccount.getUserId());
-            transferRecord.setPayeeName(payee == null ? "" : payee.getRealName());
+            User payeeUser = userDao.findById(toAccount.getUserId());
+            transferRecord.setPayeeName(payeeUser == null ? "" : payeeUser.getRealName());
             transferRecord.setToBankName("FinCloud Bank");
             transferRecord.setTransferType("INNER");
             transferRecord.setNewPayee(false);
             transferRecord.setTransferStatus("SUCCESS");
             transferRecordDao.add(connection, transferRecord);
+            writeRiskScore(connection, outTransactionId, amount, limitRule, existingPayee != null);
+
+            Payee savedPayee = new Payee();
+            savedPayee.setUserId(user.getId());
+            savedPayee.setPayeeName(transferRecord.getPayeeName());
+            savedPayee.setPayeeAccountNo(toAccount.getAccountNo());
+            savedPayee.setPayeeBankName(transferRecord.getToBankName());
+            savedPayee.setVerifiedStatus("VERIFIED");
+            payeeDao.save(connection, savedPayee);
 
             operationLogDao.add(connection, buildLog(user.getId(), "TRANSFER", "TRANSACTION",
                     outTransactionId, "Transfer completed. Amount " + amount + " to " + toAccount.getAccountNo(),
@@ -154,16 +184,16 @@ public class TransferController extends BaseController {
 
     private void validateTransfer(Account fromAccount, Account toAccount, BigDecimal amount) {
         if (toAccount == null) {
-            throw new IllegalArgumentException("The beneficiary account does not exist.");
+            throw new IllegalArgumentException("收款账户不存在，转账失败。");
         }
         if (fromAccount.getId() == toAccount.getId()) {
-            throw new IllegalArgumentException("Transfers to the same account are not allowed.");
+            throw new IllegalArgumentException("不能向自己的同一账户转账。");
         }
         if (!fromAccount.isNormal() || !toAccount.isNormal()) {
-            throw new IllegalArgumentException("The account status does not allow transfer.");
+            throw new IllegalArgumentException("付款账户或收款账户状态异常，无法转账。");
         }
         if (fromAccount.getAvailableBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Insufficient available balance.");
+            throw new IllegalArgumentException("余额不足，当前账户可用余额不足以完成本次转账。");
         }
     }
 
@@ -234,8 +264,64 @@ public class TransferController extends BaseController {
     private void loadTransferPage(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
         List<Account> accounts = accountDao.findByUserId(user.getId());
+        List<Payee> payees = payeeDao.findByUserId(user.getId());
         request.setAttribute("accounts", accounts);
+        request.setAttribute("payees", payees);
         request.getRequestDispatcher("/views/user/transfer.jsp").forward(request, response);
+    }
+
+    private TransactionLimitRule resolveLimitRule(HttpServletRequest request, String transactionType) {
+        for (String roleCode : getRoleCodes(request)) {
+            TransactionLimitRule rule = transactionLimitRuleDao.findActiveRule(roleCode, transactionType);
+            if (rule != null) {
+                return rule;
+            }
+        }
+        return transactionLimitRuleDao.findActiveRule("CUSTOMER", transactionType);
+    }
+
+    private void enforceLimitRule(TransactionLimitRule rule, BigDecimal amount) {
+        if (rule != null && amount.compareTo(rule.getSingleLimit()) > 0) {
+            throw new IllegalArgumentException("Transfer amount exceeds the single transaction limit.");
+        }
+    }
+
+    private void writeRiskScore(Connection connection, int transactionId, BigDecimal amount,
+                                TransactionLimitRule rule, boolean knownPayee) throws SQLException {
+        int score = knownPayee ? 12 : 28;
+        int ruleHitCount = 0;
+        String level = "LOW";
+        String reason = knownPayee ? "VERIFIED_PAYEE" : "NEW_COUNTERPARTY";
+        if (rule != null && amount.compareTo(rule.getApprovalThreshold()) >= 0) {
+            score = Math.max(score, 72);
+            ruleHitCount = 1;
+            level = "HIGH";
+            reason = "APPROVAL_THRESHOLD_REACHED";
+        } else if (amount.compareTo(new BigDecimal("10000")) >= 0) {
+            score = Math.max(score, 48);
+            level = "MEDIUM";
+            reason = "LARGE_AMOUNT";
+        }
+        TransactionRiskScore riskScore = new TransactionRiskScore();
+        riskScore.setTransactionId(transactionId);
+        riskScore.setRiskScore(score);
+        riskScore.setRiskLevel(level);
+        riskScore.setRiskReason(reason);
+        riskScore.setRuleHitCount(ruleHitCount);
+        transactionRiskScoreDao.add(connection, riskScore);
+    }
+
+    private SecurityEvent buildSecurityEvent(int userId, String eventType, String riskLevel,
+                                             String description, String ipAddress, String deviceFingerprint) {
+        SecurityEvent event = new SecurityEvent();
+        event.setUserId(userId);
+        event.setEventType(eventType);
+        event.setRiskLevel(riskLevel);
+        event.setDescription(description);
+        event.setIpAddress(ipAddress);
+        event.setDeviceFingerprint(deviceFingerprint);
+        event.setHandledFlag(0);
+        return event;
     }
 
     private void rollback(Connection connection) {

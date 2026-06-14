@@ -9,6 +9,7 @@ public class InvestmentOrder {
     private int userId;
     private int accountId;
     private int productId;
+    private Integer transactionId;
     private String orderType;
     private BigDecimal orderAmount;
     private String orderStatus;
@@ -52,6 +53,14 @@ public class InvestmentOrder {
 
     public void setProductId(int productId) {
         this.productId = productId;
+    }
+
+    public Integer getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Integer transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getOrderType() {

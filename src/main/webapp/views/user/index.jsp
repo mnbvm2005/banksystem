@@ -189,7 +189,9 @@
                 <a class="quick-card" href="${pageContext.request.contextPath}/deposit"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-success.svg" alt=""><strong>Deposit</strong></a>
                 <a class="quick-card" href="${pageContext.request.contextPath}/transfer"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-transfer.svg" alt=""><strong>Make a Transfer</strong></a>
                 <a class="quick-card" href="${pageContext.request.contextPath}/payment"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-pending.svg" alt=""><strong>Pay a Bill</strong></a>
+                <a class="quick-card" href="http://localhost:8080/CommunityPay/bills"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-calendar.svg" alt=""><strong>打开上财小区生活缴费</strong></a>
                 <a class="quick-card" href="${pageContext.request.contextPath}/notifications"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-shield.svg" alt=""><strong>Notifications</strong></a>
+                <a class="quick-card" href="${pageContext.request.contextPath}/logs"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-filter.svg" alt=""><strong>Logs</strong></a>
             </div>
         </div>
         <div class="panel chart-card asset-mix-card">

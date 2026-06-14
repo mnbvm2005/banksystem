@@ -1,8 +1,10 @@
 <%@ page import="banksystem.model.Account" %>
+<%@ page import="banksystem.model.Payee" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     List<Account> accounts = (List<Account>) request.getAttribute("accounts");
+    List<Payee> payees = (List<Payee>) request.getAttribute("payees");
     String error = (String) request.getAttribute("error");
 %>
 <!DOCTYPE html>
@@ -49,7 +51,7 @@
         <div class="empty-state">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-transfer.svg" alt="">
             <h3>No payment account available</h3>
-            <p>This user has no account available for transfer. Please confirm demo account data.</p>
+            <p>当前用户没有可用付款账户，无法转账。请先导入或创建测试账户。</p>
             <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/account">View Accounts</a>
         </div>
         <%
@@ -75,6 +77,28 @@
                 <input class="form-control" type="text" id="toAccountNo" name="toAccountNo" placeholder="Enter beneficiary account number" required>
                 <div class="form-text">Please verify the beneficiary account number before submission.</div>
             </div>
+            <%
+                if (payees != null && !payees.isEmpty()) {
+            %>
+            <div class="form-group">
+                <label>Frequent Payees</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <%
+                        for (Payee payee : payees) {
+                    %>
+                    <button class="btn btn-light btn-sm" type="button"
+                            onclick="document.getElementById('toAccountNo').value='<%= payee.getPayeeAccountNo() %>';">
+                        <i class="bi bi-person-check"></i>
+                        <%= payee.getPayeeName() %> · <%= payee.getPayeeAccountNo() %>
+                    </button>
+                    <%
+                        }
+                    %>
+                </div>
+            </div>
+            <%
+                }
+            %>
             <div class="form-step">
                 <span>Step 2</span>
                 <strong>Transfer Amount</strong>

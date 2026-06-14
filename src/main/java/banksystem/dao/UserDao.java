@@ -89,6 +89,28 @@ public class UserDao {
         return null;
     }
 
+    public List<User> findAll() {
+        List<User> rows = new ArrayList<User>();
+        String sql = "SELECT * FROM users ORDER BY user_id ASC";
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return rows;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                User user = mapUser(rs);
+                user.setRoleCodes(findRoleCodes(connection, user.getUserId()));
+                rows.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+        return rows;
+    }
+
     public void updateLastLoginTime(Connection connection, int userId) throws SQLException {
         String sql = "UPDATE users SET last_login_time = NOW() WHERE user_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

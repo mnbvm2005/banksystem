@@ -36,13 +36,17 @@ public class PaymentController extends MoneyOperationController {
         }
 
         try {
-            int accountId = Integer.parseInt(request.getParameter("accountId"));
+            String accountIdText = trim(request.getParameter("accountId"));
+            if (accountIdText.length() == 0) {
+                throw new IllegalArgumentException("当前用户没有可用付款账户，无法缴费。");
+            }
+            int accountId = Integer.parseInt(accountIdText);
             BigDecimal amount = parsePositiveAmount(request.getParameter("amount"));
             String paymentType = normalizePaymentType(request.getParameter("paymentType"));
             String paymentNo = normalizeRemark(request.getParameter("paymentNo"), "");
             String provider = normalizeRemark(request.getParameter("serviceProvider"), "Utility Service Center");
             if (paymentNo.length() == 0) {
-                throw new IllegalArgumentException("Please enter the payment customer number.");
+                throw new IllegalArgumentException("请输入缴费户号。");
             }
             payment(user, accountId, amount, paymentType, paymentNo, provider, request);
             response.sendRedirect(request.getContextPath() + "/transactions?success=payment");
@@ -60,13 +64,15 @@ public class PaymentController extends MoneyOperationController {
         try {
             Account account = accountDao.findByIdAndUserIdForUpdate(connection, accountId, user.getId());
             if (account == null) {
-                throw new IllegalArgumentException("The account does not exist or does not belong to the current user.");
+                throw new IllegalArgumentException("当前用户没有可用付款账户，无法缴费。");
             }
+            enforceLimitRule(resolveLimitRule(request, "PAYMENT"), amount, "Payment");
             if (!account.isNormal()) {
-                throw new IllegalArgumentException("The account status does not allow payment.");
+                writeFrozenSecurityEvent(connection, user.getId(), "PAYMENT", request);
+                throw new IllegalArgumentException("付款账户状态异常，无法缴费。");
             }
             if (account.getAvailableBalance().compareTo(amount) < 0) {
-                throw new IllegalArgumentException("Insufficient available balance.");
+                throw new IllegalArgumentException("余额不足，当前账户可用余额不足以完成本次缴费。");
             }
             BigDecimal balanceBefore = account.getBalance();
             BigDecimal balanceAfter = balanceBefore.subtract(amount);

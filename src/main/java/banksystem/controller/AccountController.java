@@ -1,7 +1,9 @@
 package banksystem.controller;
 
 import banksystem.dao.AccountDao;
+import banksystem.dao.AccountStatusHistoryDao;
 import banksystem.model.Account;
+import banksystem.model.AccountStatusHistory;
 import banksystem.model.User;
 
 import javax.servlet.ServletException;
@@ -12,6 +14,7 @@ import java.util.List;
 
 public class AccountController extends BaseController {
     private final AccountDao accountDao = new AccountDao();
+    private final AccountStatusHistoryDao accountStatusHistoryDao = new AccountStatusHistoryDao();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -22,7 +25,9 @@ public class AccountController extends BaseController {
         }
 
         List<Account> accounts = accountDao.findByUserId(user.getId());
+        List<AccountStatusHistory> recentStatusHistories = accountStatusHistoryDao.findRecentByUserId(user.getId(), 6);
         request.setAttribute("accounts", accounts);
+        request.setAttribute("recentStatusHistories", recentStatusHistories);
         request.getRequestDispatcher("/views/user/account.jsp").forward(request, response);
     }
 }

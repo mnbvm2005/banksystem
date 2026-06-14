@@ -59,7 +59,7 @@
     }
 
     function autoDismissAlerts() {
-        var alerts = document.querySelectorAll(".alert");
+        var alerts = document.querySelectorAll(".alert:not(.alert-danger)");
         alerts.forEach(function (alert) {
             window.setTimeout(function () {
                 alert.classList.add("alert-fade");
@@ -191,7 +191,8 @@
             { title: "Holdings", desc: "Investment and holding records", href: "/holding", terms: "holding investment portfolio" },
             { title: "Notifications", desc: "Security and system messages", href: "/notifications", terms: "notification alert security" },
             { title: "Logs", desc: "Operation audit logs", href: "/logs", terms: "logs audit operation" },
-            { title: "Approval", desc: "Pending review workflow", href: "/approval", terms: "approval pending review" }
+            { title: "Approval", desc: "Pending review workflow", href: "/approval", terms: "approval pending review" },
+            { title: "Admin Center", desc: "Operational control and diagnostics", href: "/admin", terms: "admin center users roles security diagnostics limits" }
         ];
 
         function closeResults() {

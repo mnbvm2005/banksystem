@@ -51,7 +51,9 @@ public class WithdrawController extends MoneyOperationController {
             if (account == null) {
                 throw new IllegalArgumentException("The account does not exist or does not belong to the current user.");
             }
+            enforceLimitRule(resolveLimitRule(request, "WITHDRAW"), amount, "Withdrawal");
             if (!account.isNormal()) {
+                writeFrozenSecurityEvent(connection, user.getId(), "WITHDRAW", request);
                 throw new IllegalArgumentException("The account status does not allow withdrawal.");
             }
             if (account.getAvailableBalance().compareTo(amount) < 0) {

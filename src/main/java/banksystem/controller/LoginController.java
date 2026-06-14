@@ -1,8 +1,15 @@
 package banksystem.controller;
 
 import banksystem.dao.AuthRecordDao;
+import banksystem.dao.LoginDeviceDao;
+import banksystem.dao.NotificationDao;
+import banksystem.dao.OperationLogDao;
+import banksystem.dao.SecurityEventDao;
 import banksystem.dao.UserDao;
 import banksystem.model.AuthRecord;
+import banksystem.model.Notification;
+import banksystem.model.OperationLog;
+import banksystem.model.SecurityEvent;
 import banksystem.model.User;
 import banksystem.sqloperation.GetMySQLConnection;
 
@@ -16,12 +23,17 @@ import java.sql.SQLException;
 public class LoginController extends BaseController {
     private final UserDao userDao = new UserDao();
     private final AuthRecordDao authRecordDao = new AuthRecordDao();
+    private final LoginDeviceDao loginDeviceDao = new LoginDeviceDao();
+    private final SecurityEventDao securityEventDao = new SecurityEventDao();
+    private final NotificationDao notificationDao = new NotificationDao();
+    private final OperationLogDao operationLogDao = new OperationLogDao();
 
     @Override
     protected void doGet(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath = request.getServletPath();
         if ("/logout".equals(servletPath)) {
+            writeLogoutAudit(request);
             request.getSession().invalidate();
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -75,17 +87,32 @@ public class LoginController extends BaseController {
 
         try {
             connection.setAutoCommit(false);
+            String deviceFingerprint = buildDeviceFingerprint(request);
             if (loginUser == null) {
                 writeAuthRecord(connection, candidate == null ? null : candidate.getUserId(), account,
-                        "FAILED", failReason, request);
+                        "PASSWORD", "FAILED", failReason, deviceFingerprint, request);
+                operationLogDao.add(connection, buildOperationLog(candidate == null ? null : Integer.valueOf(candidate.getUserId()),
+                        "LOGIN", "USER", candidate == null ? null : Integer.valueOf(candidate.getUserId()),
+                        "Login failed for account " + account + ": " + failReason, "FAILED", request));
+                if (authRecordDao.countRecentFailures(account, request.getRemoteAddr(), 10) >= 2) {
+                    securityEventDao.add(connection, buildSecurityEvent(candidate == null ? 0 : candidate.getUserId(),
+                            "LOGIN_FAILURE_BURST", "HIGH",
+                            "Multiple login failures detected for account " + account + ".", deviceFingerprint, request));
+                }
                 connection.commit();
                 request.setAttribute("error", failReason);
                 request.getRequestDispatcher("/views/login.jsp").forward(request, response);
                 return;
             }
 
-            writeAuthRecord(connection, loginUser.getUserId(), account, "SUCCESS", null, request);
+            writeAuthRecord(connection, loginUser.getUserId(), account, "PASSWORD", "SUCCESS",
+                    null, deviceFingerprint, request);
             userDao.updateLastLoginTime(connection, loginUser.getUserId());
+            loginDeviceDao.upsertLoginDevice(connection, loginUser.getUserId(), deviceFingerprint,
+                    buildDeviceName(request), detectBrowser(request), detectOs(request));
+            operationLogDao.add(connection, buildOperationLog(Integer.valueOf(loginUser.getUserId()),
+                    "LOGIN", "USER", Integer.valueOf(loginUser.getUserId()),
+                    "User signed in successfully.", "SUCCESS", request));
             connection.commit();
 
             request.getSession().setAttribute("loginUser", loginUser);
@@ -105,15 +132,17 @@ public class LoginController extends BaseController {
         }
     }
 
-    private void writeAuthRecord(Connection connection, Integer userId, String account, String result,
-                                 String failReason, javax.servlet.http.HttpServletRequest request) throws SQLException {
+    private void writeAuthRecord(Connection connection, Integer userId, String account, String authType, String result,
+                                 String failReason, String deviceFingerprint,
+                                 javax.servlet.http.HttpServletRequest request) throws SQLException {
         AuthRecord record = new AuthRecord();
         record.setUserId(userId);
         record.setLoginAccount(account);
-        record.setAuthType("PASSWORD");
+        record.setAuthType(authType);
         record.setAuthResult(result);
         record.setFailureReason(failReason);
         record.setLoginIp(request.getRemoteAddr());
+        record.setDeviceFingerprint(deviceFingerprint);
         authRecordDao.add(connection, record);
     }
 
@@ -169,8 +198,17 @@ public class LoginController extends BaseController {
         try {
             connection.setAutoCommit(false);
             User user = userDao.createCustomer(connection, username, realName, phone, email, password);
-            writeAuthRecord(connection, user.getUserId(), username, "SUCCESS", null, request);
+            String deviceFingerprint = buildDeviceFingerprint(request);
+            writeAuthRecord(connection, user.getUserId(), username, "REGISTER", "SUCCESS",
+                    null, deviceFingerprint, request);
             userDao.updateLastLoginTime(connection, user.getUserId());
+            loginDeviceDao.upsertLoginDevice(connection, user.getUserId(), deviceFingerprint,
+                    buildDeviceName(request), detectBrowser(request), detectOs(request));
+            notificationDao.add(connection, buildNotification(user.getUserId(), "Registration completed",
+                    "Welcome to FinCloud Bank. Your new account is ready to use.", "SYSTEM"));
+            operationLogDao.add(connection, buildOperationLog(Integer.valueOf(user.getUserId()),
+                    "REGISTER", "USER", Integer.valueOf(user.getUserId()),
+                    "Customer registration completed and default account created.", "SUCCESS", request));
             connection.commit();
 
             request.getSession().setAttribute("loginUser", user);
@@ -191,7 +229,67 @@ public class LoginController extends BaseController {
         }
     }
 
-    private String trim(String value) {
-        return value == null ? "" : value.trim();
+    private Notification buildNotification(int userId, String title, String content, String type) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setTitle(title);
+        notification.setContent(content);
+        notification.setNotificationType(type);
+        return notification;
+    }
+
+    private SecurityEvent buildSecurityEvent(int userId, String eventType, String riskLevel,
+                                             String description, String deviceFingerprint,
+                                             HttpServletRequest request) {
+        SecurityEvent event = new SecurityEvent();
+        event.setUserId(userId);
+        event.setEventType(eventType);
+        event.setRiskLevel(riskLevel);
+        event.setDescription(description);
+        event.setIpAddress(request.getRemoteAddr());
+        event.setDeviceFingerprint(deviceFingerprint);
+        event.setHandledFlag(0);
+        return event;
+    }
+
+    private void writeLogoutAudit(HttpServletRequest request) {
+        User user = getLoginUser(request);
+        if (user == null) {
+            return;
+        }
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return;
+        }
+        try {
+            connection.setAutoCommit(false);
+            writeAuthRecord(connection, user.getUserId(), user.getUsername(), "LOGOUT", "SUCCESS",
+                    null, buildDeviceFingerprint(request), request);
+            operationLogDao.add(connection, buildOperationLog(Integer.valueOf(user.getUserId()),
+                    "LOGOUT", "USER", Integer.valueOf(user.getUserId()),
+                    "User signed out.", "SUCCESS", request));
+            connection.commit();
+        } catch (SQLException ignored) {
+            try {
+                connection.rollback();
+            } catch (SQLException ignoredRollback) {
+            }
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+    }
+
+    private OperationLog buildOperationLog(Integer userId, String operationType, String objectType,
+                                           Integer objectId, String content, String result,
+                                           HttpServletRequest request) {
+        OperationLog log = new OperationLog();
+        log.setUserId(userId);
+        log.setOperationType(operationType);
+        log.setObjectType(objectType);
+        log.setObjectId(objectId);
+        log.setOperationContent(content);
+        log.setOperationResult(result);
+        log.setIpAddress(request.getRemoteAddr());
+        return log;
     }
 }

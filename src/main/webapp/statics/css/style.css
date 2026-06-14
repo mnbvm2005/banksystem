@@ -8717,3 +8717,125 @@ body.app-body.ambient-page.bill-query-page .page::before {
     cursor: default !important;
     box-shadow: none !important;
 }
+
+/* Payment page has a single primary card; keep it centered instead of inheriting transfer's two-column grid. */
+.payment-centered-layout {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+}
+
+.payment-centered-layout .transfer-panel {
+    width: min(720px, 100%) !important;
+}
+
+/* Final polish for bill presets, login contrast, and operation logs. */
+.login-brand {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.login-brand h1 {
+    color: #fff8e8 !important;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(214, 170, 97, 0.35) !important;
+}
+
+.login-brand p,
+.login-wordmark small {
+    color: rgba(255, 248, 232, 0.86) !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.42) !important;
+}
+
+.login-wordmark strong {
+    color: #fff8e8 !important;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.48) !important;
+}
+
+.saved-query-inline-form {
+    margin: 0 0 14px !important;
+}
+
+.saved-query-inline-form .form-control,
+.saved-query-inline-form .btn {
+    min-height: 40px !important;
+    border-color: rgba(205, 178, 132, 0.58) !important;
+}
+
+.saved-query-card {
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+    border: 1px solid rgba(205, 178, 132, 0.48) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 253, 248, 0.76) !important;
+}
+
+.saved-query-card strong,
+.saved-query-card .small {
+    display: block !important;
+    overflow-wrap: anywhere !important;
+}
+
+.saved-query-icon {
+    width: 38px !important;
+    height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #f0c46d !important;
+    background: linear-gradient(180deg, #07111f 0%, #101c2c 100%) !important;
+    border: 1px solid rgba(214, 170, 97, 0.70) !important;
+    border-radius: 8px !important;
+}
+
+.log-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 18px !important;
+}
+
+.log-summary-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 18px !important;
+}
+
+.log-summary-card > span {
+    width: 46px !important;
+    height: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #f0c46d !important;
+    background: linear-gradient(180deg, #07111f 0%, #101c2c 100%) !important;
+    border: 1px solid rgba(214, 170, 97, 0.70) !important;
+    border-radius: 8px !important;
+}
+
+.log-summary-card small {
+    display: block !important;
+    color: var(--color-muted) !important;
+    font-weight: 700 !important;
+}
+
+.log-summary-card strong {
+    display: block !important;
+    color: #07111f !important;
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+    font-size: 34px !important;
+    line-height: 1 !important;
+}
+
+.log-filter-panel {
+    margin-bottom: 18px !important;
+}
+
+@media (max-width: 760px) {
+    .log-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

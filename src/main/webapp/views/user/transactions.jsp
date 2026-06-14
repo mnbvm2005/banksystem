@@ -1,4 +1,5 @@
 <%@ page import="banksystem.model.Transaction" %>
+<%@ page import="banksystem.model.SavedQuery" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.math.RoundingMode" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -8,6 +9,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     List<Transaction> transactions = (List<Transaction>) request.getAttribute("transactions");
+    List<SavedQuery> savedTransactionQueries = (List<SavedQuery>) request.getAttribute("savedTransactionQueries");
     String success = request.getParameter("success");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
     DecimalFormat integerFormat = new DecimalFormat("#,##0");
@@ -146,6 +148,15 @@
                 </div>
                 <button class="transaction-clear" type="button">Clear</button>
                 <button class="transaction-export" type="button"><i class="bi bi-download"></i>Export <i class="bi bi-chevron-down"></i></button>
+            </div>
+            <div class="mt-3 d-flex flex-wrap gap-2 align-items-center" id="savedQueries">
+                <span class="text-muted small fw-semibold">My Query Presets</span>
+                <% if (savedTransactionQueries != null && !savedTransactionQueries.isEmpty()) { for (SavedQuery query : savedTransactionQueries) { %>
+                <span class="badge-soft-primary"><%= query.getQueryName() %></span>
+                <% }} else { %>
+                <span class="text-muted small">No saved transaction presets yet.</span>
+                <% } %>
+                <a class="btn btn-light btn-sm ms-auto" href="${pageContext.request.contextPath}/saved-queries">Manage Presets</a>
             </div>
         </div>
         <aside class="transaction-overview-panel">

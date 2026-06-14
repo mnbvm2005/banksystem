@@ -20,8 +20,19 @@ public class LogController extends BaseController {
         if (user == null) {
             return;
         }
-        List<OperationLog> logs = operationLogDao.findVisible(user.getId(), hasRole(request, "ADMIN"));
+        boolean admin = hasRole(request, "ADMIN");
+        String operationType = trim(request.getParameter("operationType"));
+        String result = trim(request.getParameter("result"));
+        String keyword = trim(request.getParameter("keyword"));
+        List<OperationLog> logs = operationLogDao.findVisible(user.getId(), admin, operationType, result, keyword, 80);
         request.setAttribute("logs", logs);
+        request.setAttribute("logTotal", Integer.valueOf(operationLogDao.countVisible(user.getId(), admin)));
+        request.setAttribute("logSuccess", Integer.valueOf(operationLogDao.countVisibleByResult(user.getId(), admin, "SUCCESS")));
+        request.setAttribute("logFailed", Integer.valueOf(operationLogDao.countVisibleByResult(user.getId(), admin, "FAILED")));
+        request.setAttribute("operationType", operationType);
+        request.setAttribute("result", result);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("adminLogView", Boolean.valueOf(admin));
         request.getRequestDispatcher("/views/user/logs.jsp").forward(request, response);
     }
 }

@@ -33,6 +33,25 @@ public class FinancialProductDao {
         return products;
     }
 
+    public FinancialProduct findById(int productId) {
+        String sql = "SELECT * FROM financial_products WHERE product_id = ?";
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return null;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapProduct(rs) : null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+    }
+
     private FinancialProduct mapProduct(ResultSet rs) throws SQLException {
         FinancialProduct product = new FinancialProduct();
         product.setId(rs.getInt("product_id"));

@@ -117,6 +117,32 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>OpenPaymentApiController</servlet-name>
+        <servlet-class>banksystem.controller.OpenPaymentApiController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OpenPaymentApiController</servlet-name>
+        <url-pattern>/api/open/payment/create</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OpenPaymentApiController</servlet-name>
+        <url-pattern>/api/open/payment/status</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BankPayController</servlet-name>
+        <servlet-class>banksystem.controller.BankPayController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BankPayController</servlet-name>
+        <url-pattern>/bankpay/checkout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BankPayController</servlet-name>
+        <url-pattern>/bankpay/confirm</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>BillController</servlet-name>
         <servlet-class>banksystem.controller.BillController</servlet-class>
     </servlet>
@@ -159,5 +185,77 @@
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/notifications</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminController</servlet-name>
+        <servlet-class>banksystem.controller.AdminController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminController</servlet-name>
+        <url-pattern>/admin</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BudgetController</servlet-name>
+        <servlet-class>banksystem.controller.BudgetController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BudgetController</servlet-name>
+        <url-pattern>/budgets</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SavedQueryController</servlet-name>
+        <servlet-class>banksystem.controller.SavedQueryController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SavedQueryController</servlet-name>
+        <url-pattern>/saved-queries</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SecurityController</servlet-name>
+        <servlet-class>banksystem.controller.SecurityController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SecurityController</servlet-name>
+        <url-pattern>/security</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RiskController</servlet-name>
+        <servlet-class>banksystem.controller.RiskController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RiskController</servlet-name>
+        <url-pattern>/risk</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DailySummaryController</servlet-name>
+        <servlet-class>banksystem.controller.DailySummaryController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DailySummaryController</servlet-name>
+        <url-pattern>/daily-summaries</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BranchController</servlet-name>
+        <servlet-class>banksystem.controller.BranchController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BranchController</servlet-name>
+        <url-pattern>/branches</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CategoryController</servlet-name>
+        <servlet-class>banksystem.controller.CategoryController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CategoryController</servlet-name>
+        <url-pattern>/categories</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -60,6 +60,34 @@ public class TransactionApprovalDao {
         return approvals;
     }
 
+    public List<TransactionApproval> findAll() {
+        String sql = "SELECT * FROM transaction_approvals ORDER BY submit_time DESC, approval_id DESC";
+        List<TransactionApproval> approvals = new ArrayList<TransactionApproval>();
+        Connection connection = GetMySQLConnection.getConnection();
+        if (connection == null) {
+            return approvals;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                TransactionApproval approval = new TransactionApproval();
+                approval.setApprovalId(rs.getInt("approval_id"));
+                approval.setTransactionId(rs.getInt("transaction_id"));
+                int approverId = rs.getInt("approver_id");
+                approval.setApproverId(rs.wasNull() ? null : approverId);
+                approval.setApprovalStatus(rs.getString("approval_status"));
+                approval.setApprovalComment(rs.getString("approval_opinion"));
+                approval.setApprovalTime(rs.getTimestamp("submit_time"));
+                approvals.add(approval);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            GetMySQLConnection.closeConnection(connection);
+        }
+        return approvals;
+    }
+
     public void updateStatus(Connection connection, int approvalId, int approverId,
                              String status, String comment) throws SQLException {
         String sql = "UPDATE transaction_approvals "
