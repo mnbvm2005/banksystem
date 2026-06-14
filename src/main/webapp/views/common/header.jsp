@@ -45,7 +45,8 @@
         </div>
         <div class="topbar-search">
             <img src="${pageContext.request.contextPath}/statics/assets/icons/icon-search.svg" alt="">
-            <input type="search" placeholder="Search accounts, transactions, and more...">
+            <input class="js-global-search" type="search" placeholder="Search accounts, transactions, and more..." autocomplete="off">
+            <div class="global-search-results" aria-live="polite"></div>
         </div>
         <div class="topbar-actions">
             <span class="security-chip"><img src="${pageContext.request.contextPath}/statics/assets/icons/icon-shield.svg" alt="">All Systems Operational</span>

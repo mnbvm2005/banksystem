@@ -15,7 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
 </head>
-<body class="app-body">
+<body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
 <main class="page">
     <section class="page-hero compact-hero"><div><p class="eyebrow">Notifications</p><h1>Notification Center</h1><p>Transaction, approval, security, and system messages in one polished inbox.</p></div></section>

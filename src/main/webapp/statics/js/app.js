@@ -94,6 +94,9 @@
     function bindTableSearch() {
         var inputs = document.querySelectorAll(".js-table-search");
         inputs.forEach(function (input) {
+            if (input.classList.contains("js-transaction-search")) {
+                return;
+            }
             input.addEventListener("input", function () {
                 var target = document.querySelector(input.getAttribute("data-target"));
                 if (!target) {
@@ -104,6 +107,136 @@
                     row.style.display = row.textContent.toLowerCase().indexOf(keyword) === -1 ? "none" : "";
                 });
             });
+        });
+    }
+
+    function bindTransactionFilters() {
+        var table = document.getElementById("transactionTable");
+        var search = document.querySelector(".js-transaction-search");
+        var filters = document.querySelectorAll(".js-transaction-filter");
+        var clear = document.querySelector(".transaction-clear");
+        if (!table) {
+            return;
+        }
+
+        function normalized(value) {
+            return (value || "").trim().toLowerCase();
+        }
+
+        function selected(filterName) {
+            var control = document.querySelector(".js-transaction-filter[data-filter=\"" + filterName + "\"]");
+            if (!control) {
+                return "";
+            }
+            var value = normalized(control.value);
+            return value.indexOf("all ") === 0 ? "" : value;
+        }
+
+        function applyFilters() {
+            var keyword = search ? normalized(search.value) : "";
+            var type = selected("type");
+            var status = selected("status");
+            var account = selected("account");
+            table.querySelectorAll("tbody tr").forEach(function (row) {
+                var rowText = normalized(row.textContent);
+                var rowType = normalized(row.getAttribute("data-type"));
+                var rowStatus = normalized(row.getAttribute("data-status"));
+                var rowAccount = normalized(row.getAttribute("data-account"));
+                var visible = (!keyword || rowText.indexOf(keyword) >= 0)
+                    && (!type || rowType === type)
+                    && (!status || rowStatus === status)
+                    && (!account || rowAccount === account);
+                row.style.display = visible ? "" : "none";
+            });
+        }
+
+        if (search) {
+            search.addEventListener("input", applyFilters);
+        }
+        filters.forEach(function (filter) {
+            filter.addEventListener("change", applyFilters);
+        });
+        if (clear) {
+            clear.addEventListener("click", function () {
+                if (search) {
+                    search.value = "";
+                }
+                filters.forEach(function (filter) {
+                    filter.selectedIndex = 0;
+                });
+                applyFilters();
+            });
+        }
+    }
+
+    function bindGlobalSearch() {
+        var input = document.querySelector(".js-global-search");
+        var results = document.querySelector(".global-search-results");
+        if (!input || !results) {
+            return;
+        }
+
+        var firstPath = window.location.pathname.split("/")[1] || "";
+        var base = firstPath ? "/" + firstPath : "";
+        var items = [
+            { title: "Dashboard", desc: "Executive overview and asset charts", href: "/index", terms: "home overview assets chart dashboard" },
+            { title: "Accounts", desc: "Balances and linked bank accounts", href: "/account", terms: "account balance saving current bank" },
+            { title: "Transactions", desc: "Ledger, inflow, outflow, and black box records", href: "/transactions", terms: "transaction ledger inflow outflow record search black box" },
+            { title: "Deposit", desc: "Add funds to an account", href: "/deposit", terms: "deposit income add money" },
+            { title: "Withdraw", desc: "Withdraw money from an account", href: "/withdraw", terms: "withdraw cash outflow" },
+            { title: "Transfer", desc: "Move money between accounts", href: "/transfer", terms: "transfer send wire money" },
+            { title: "Payment", desc: "Pay bills and service providers", href: "/payment", terms: "payment bill pay expense" },
+            { title: "Bills", desc: "Income and expense bill records", href: "/bill", terms: "bill income expense calendar" },
+            { title: "Finance", desc: "Budgets and financial insights", href: "/finance", terms: "finance budget insights" },
+            { title: "Holdings", desc: "Investment and holding records", href: "/holding", terms: "holding investment portfolio" },
+            { title: "Notifications", desc: "Security and system messages", href: "/notifications", terms: "notification alert security" },
+            { title: "Logs", desc: "Operation audit logs", href: "/logs", terms: "logs audit operation" },
+            { title: "Approval", desc: "Pending review workflow", href: "/approval", terms: "approval pending review" }
+        ];
+
+        function closeResults() {
+            results.classList.remove("is-open");
+            results.innerHTML = "";
+        }
+
+        function render(matches) {
+            if (!matches.length) {
+                results.innerHTML = "<div class=\"global-search-empty\">No matching page found</div>";
+                results.classList.add("is-open");
+                return;
+            }
+            results.innerHTML = matches.slice(0, 6).map(function (item) {
+                return "<a href=\"" + base + item.href + "\"><strong>" + item.title + "</strong><span>" + item.desc + "</span></a>";
+            }).join("");
+            results.classList.add("is-open");
+        }
+
+        input.addEventListener("input", function () {
+            var keyword = input.value.trim().toLowerCase();
+            if (!keyword) {
+                closeResults();
+                return;
+            }
+            render(items.filter(function (item) {
+                return (item.title + " " + item.desc + " " + item.terms).toLowerCase().indexOf(keyword) >= 0;
+            }));
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+            var first = results.querySelector("a");
+            if (first) {
+                event.preventDefault();
+                window.location.href = first.href;
+            }
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest(".topbar-search")) {
+                closeResults();
+            }
         });
     }
 
@@ -201,13 +334,34 @@
             var fillGradient = ctx.createLinearGradient(0, 0, 0, cashflow.clientHeight || 220);
             fillGradient.addColorStop(0, "rgba(8, 20, 33, 0.16)");
             fillGradient.addColorStop(1, "rgba(8, 20, 33, 0.015)");
-            new Chart(cashflow, {
+            var assetRanges = {
+                month: {
+                    labels: ["Apr 29", "May 3", "May 7", "May 11", "May 15", "May 19", "May 23", "May 29"],
+                    data: [720000, 800000, 870000, 960000, 1040000, 1140000, 1210000, 1274580],
+                    min: 700000,
+                    max: 1300000
+                },
+                quarter: {
+                    labels: ["Mar 1", "Mar 15", "Apr 1", "Apr 15", "May 1", "May 15", "Jun 1", "Jun 13"],
+                    data: [820000, 885000, 960000, 1035000, 1100000, 1180000, 1235000, 1274580],
+                    min: 780000,
+                    max: 1320000
+                },
+                year: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    data: [610000, 695000, 840000, 990000, 1140000, 1274580, 1274580, 1274580, 1274580, 1274580, 1274580, 1274580],
+                    min: 560000,
+                    max: 1320000
+                }
+            };
+            var activeRange = assetRanges.month;
+            var cashflowChart = new Chart(cashflow, {
                 type: "line",
                 data: {
-                    labels: ["Apr 29", "May 3", "May 7", "May 11", "May 15", "May 19", "May 23", "May 29"],
+                    labels: activeRange.labels,
                     datasets: [{
                         label: "Total Assets",
-                        data: [720000, 800000, 870000, 960000, 1040000, 1140000, 1210000, 1274580],
+                        data: activeRange.data,
                         borderColor: "#081421",
                         backgroundColor: fillGradient,
                         pointBackgroundColor: "#081421",
@@ -239,8 +393,8 @@
                             }
                         },
                         y: {
-                            min: 700000,
-                            max: 1300000,
+                            min: activeRange.min,
+                            max: activeRange.max,
                             grid: {
                                 color: "rgba(8, 20, 33, 0.065)"
                             },
@@ -254,6 +408,17 @@
                     }
                 }
             });
+            var rangeControl = document.querySelector(".js-chart-range[data-target=\"cashflowChart\"]");
+            if (rangeControl) {
+                rangeControl.addEventListener("change", function () {
+                    var nextRange = assetRanges[rangeControl.value] || assetRanges.month;
+                    cashflowChart.data.labels = nextRange.labels;
+                    cashflowChart.data.datasets[0].data = nextRange.data;
+                    cashflowChart.options.scales.y.min = nextRange.min;
+                    cashflowChart.options.scales.y.max = nextRange.max;
+                    cashflowChart.update();
+                });
+            }
         }
 
         var asset = document.getElementById("assetChart");
@@ -345,29 +510,46 @@
 
         var transactionType = document.getElementById("transactionTypeChart");
         if (transactionType) {
-            var counts = {};
-            document.querySelectorAll("#transactionTable tbody [data-filter-value]").forEach(function (cell) {
-                var key = cell.getAttribute("data-filter-value").replace(" Out", "").replace(" In", "");
-                counts[key] = (counts[key] || 0) + 1;
-            });
-            var typeLabels = Object.keys(counts);
-            if (typeLabels.length === 0) {
+            var inflowData = Number(transactionType.getAttribute("data-inflow"));
+            var outflowData = Number(transactionType.getAttribute("data-outflow"));
+            var internalData = Number(transactionType.getAttribute("data-internal"));
+            var hasServerData = !isNaN(inflowData) || !isNaN(outflowData) || !isNaN(internalData);
+            var typeLabels = ["Inflow", "Outflow", "Internal"];
+            var typeValues = [
+                isNaN(inflowData) ? 0 : inflowData,
+                isNaN(outflowData) ? 0 : outflowData,
+                isNaN(internalData) ? 0 : internalData
+            ];
+            if (!hasServerData) {
+                var counts = {};
+                document.querySelectorAll("#transactionTable tbody [data-filter-value]").forEach(function (cell) {
+                    var key = cell.getAttribute("data-filter-value");
+                    counts[key] = (counts[key] || 0) + 1;
+                });
+                typeLabels = Object.keys(counts);
+                typeValues = typeLabels.map(function (label) { return counts[label]; });
+            }
+            if (typeValues.reduce(function (sum, item) { return sum + item; }, 0) === 0) {
                 typeLabels = ["No Data"];
-                counts["No Data"] = 1;
+                typeValues = [1];
             }
             new Chart(transactionType, {
                 type: "doughnut",
                 data: {
                     labels: typeLabels,
                     datasets: [{
-                        data: typeLabels.map(function (label) { return counts[label]; }),
-                        backgroundColor: ["#081421", "#2F5BEA", "#D6AF5F", "#16A34A", "#DC2626"],
-                        borderWidth: 0
+                        data: typeValues,
+                        backgroundColor: ["#081421", "#B8872F", "#D9C9AE"],
+                        borderColor: "#FFFFFF",
+                        borderWidth: 4,
+                        hoverOffset: 4
                     }]
                 },
                 options: {
-                    cutout: "68%",
-                    plugins: { legend: { position: "bottom" } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "66%",
+                    plugins: { legend: { display: false } }
                 }
             });
         }
@@ -459,6 +641,8 @@
         applySerifNumerals();
         autoDismissAlerts();
         bindTableSearch();
+        bindTransactionFilters();
+        bindGlobalSearch();
         bindPasswordToggle();
         bindSidebarToggle();
         bindTransferConfirm();

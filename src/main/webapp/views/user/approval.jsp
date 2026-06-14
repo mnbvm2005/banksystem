@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/style.css">
 </head>
-<body class="app-body">
+<body class="app-body ambient-page">
 <%@ include file="nav.jsp" %>
 <main class="page">
     <section class="page-hero compact-hero"><div><p class="eyebrow">Approval</p><h1>Large Transaction Approval</h1><p>Prototype route for pending transaction approval.</p></div></section>

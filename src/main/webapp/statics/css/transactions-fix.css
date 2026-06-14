@@ -1,0 +1,476 @@
+body .transaction-filter-panel {
+    min-height: 184px !important;
+    max-width: 100% !important;
+    display: grid !important;
+    align-content: center !important;
+    gap: 16px !important;
+    padding: 20px 24px !important;
+    overflow: hidden !important;
+}
+
+body .transaction-filter-row {
+    display: grid !important;
+    grid-template-columns: minmax(280px, 1.18fr) minmax(150px, 0.74fr) minmax(165px, 0.78fr) minmax(150px, 0.70fr) !important;
+    gap: 14px !important;
+    align-items: end !important;
+    max-width: 100% !important;
+}
+
+body .transaction-filter-row label {
+    min-width: 0 !important;
+    gap: 8px !important;
+    color: #07111F !important;
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 760 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.01em !important;
+}
+
+body .transaction-filter-row button,
+body .transaction-filter-row select,
+body .transaction-filter-panel .form-control {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    overflow: hidden !important;
+    color: #07111F !important;
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 560 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body .transaction-filter-row label:first-child button {
+    font-size: 14px !important;
+}
+
+body .transaction-search-row {
+    display: grid !important;
+    grid-template-columns: minmax(360px, 1fr) 76px 132px !important;
+    gap: 12px !important;
+    align-items: center !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+body .transaction-search-row .table-tools {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+body .transaction-search-row .table-tools .form-control {
+    min-height: 42px !important;
+    font-size: 14px !important;
+}
+
+body .transaction-clear,
+body .transaction-export {
+    min-height: 42px !important;
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+}
+
+body .transaction-clear {
+    width: 76px !important;
+}
+
+body .transaction-export {
+    width: 132px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::before {
+    display: inline-block !important;
+    color: #DDBA65 !important;
+    font-size: 23px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell {
+    color: #DDBA65 !important;
+    background: #081421 !important;
+}
+
+body .transaction-kpi-card.metric-card > strong,
+body .transaction-kpi-card.metric-card > strong .digit-serif,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-positive,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-positive .digit-serif,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-negative,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-negative .digit-serif {
+    color: #DDBA65 !important;
+    background: #081421 !important;
+}
+
+/* Definitive transaction KPI layout: remove inherited dashboard decorations. */
+body .transaction-kpi-grid.metric-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    margin: 18px 0 24px !important;
+}
+
+body .transaction-kpi-card.metric-card,
+body .transaction-kpi-card.metric-card:hover {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    grid-template-rows: 54px 38px 28px !important;
+    grid-template-areas:
+        "icon title"
+        "value value"
+        "meta meta" !important;
+    column-gap: 12px !important;
+    row-gap: 12px !important;
+    min-height: 168px !important;
+    height: auto !important;
+    padding: 18px 18px 16px !important;
+    overflow: hidden !important;
+    background: #FFFDF8 !important;
+    background-image: none !important;
+    border: 1px solid rgba(220, 211, 198, 0.96) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 22px rgba(8, 20, 33, 0.035) !important;
+}
+
+body .transaction-kpi-card.metric-card::before,
+body .transaction-kpi-card.metric-card::after,
+body .transaction-kpi-card.metric-card > span:first-child::before,
+body .transaction-kpi-card.metric-card > span:first-child::after,
+body .transaction-kpi-card.metric-card > strong::before,
+body .transaction-kpi-card.metric-card > strong::after,
+body .transaction-kpi-card.metric-card > small::before,
+body .transaction-kpi-card.metric-card > small::after {
+    content: none !important;
+    display: none !important;
+}
+
+body .transaction-kpi-card.metric-card > span:first-child {
+    display: contents !important;
+    font-size: 0 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell {
+    grid-area: icon !important;
+    position: static !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    justify-self: center !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: #DDBA65 !important;
+    background: #081421 !important;
+    border: 1px solid rgba(214, 175, 95, 0.70) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 0 0 4px #0E1A27, inset 0 0 0 5px rgba(214, 175, 95, 0.22) !important;
+    font-size: 21px !important;
+    line-height: 1 !important;
+    transform: none !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::before {
+    display: inline-block !important;
+    color: #DDBA65 !important;
+    font-family: "bootstrap-icons" !important;
+    font-size: 21px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-title {
+    grid-area: title !important;
+    align-self: center !important;
+    justify-self: start !important;
+    color: #687083 !important;
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 820 !important;
+    line-height: 1.14 !important;
+    letter-spacing: 0.025em !important;
+    text-transform: uppercase !important;
+}
+
+body .transaction-kpi-card.metric-card > strong,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-positive,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-negative {
+    grid-area: value !important;
+    align-self: center !important;
+    justify-self: center !important;
+    width: min(92%, 160px) !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 14px 4px !important;
+    overflow: hidden !important;
+    color: #DDBA65 !important;
+    background: #081421 !important;
+    border: 1px solid rgba(214, 175, 95, 0.34) !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 230, 165, 0.08) !important;
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+    font-size: clamp(21px, 1.35vw, 27px) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+body .transaction-kpi-card.metric-card > strong .digit-serif {
+    color: #DDBA65 !important;
+    background: transparent !important;
+    font-size: inherit !important;
+    line-height: 1 !important;
+}
+
+body .transaction-kpi-card.metric-card > small {
+    grid-area: meta !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    color: #687083 !important;
+    background: transparent !important;
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-badge {
+    display: none !important;
+}
+
+/* Definitive compact filter layout. */
+body .transaction-filter-panel {
+    min-height: 172px !important;
+    padding: 18px 22px !important;
+    gap: 14px !important;
+}
+
+body .transaction-filter-row {
+    grid-template-columns: minmax(260px, 1.25fr) minmax(150px, 0.74fr) minmax(160px, 0.78fr) !important;
+    gap: 14px !important;
+}
+
+body .transaction-filter-row label:nth-child(4) {
+    display: none !important;
+}
+
+body .transaction-filter-row label,
+body .transaction-filter-row button,
+body .transaction-filter-row select,
+body .transaction-filter-panel .form-control {
+    font-family: Inter, "PingFang SC", system-ui, sans-serif !important;
+}
+
+body .transaction-filter-row label {
+    font-size: 13px !important;
+}
+
+body .transaction-filter-row button,
+body .transaction-filter-row select,
+body .transaction-filter-panel .form-control {
+    min-height: 40px !important;
+    font-size: 13px !important;
+}
+
+body .transaction-search-row {
+    grid-template-columns: minmax(320px, 1fr) 72px 126px !important;
+    gap: 10px !important;
+}
+
+body .transaction-clear,
+body .transaction-export {
+    min-height: 40px !important;
+    font-size: 13px !important;
+}
+
+body .transaction-clear {
+    width: 72px !important;
+}
+
+body .transaction-export {
+    width: 126px !important;
+}
+
+/* SVG icon rendering: use real dashboard assets instead of Bootstrap pseudo-elements. */
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::before,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::after {
+    content: none !important;
+    display: none !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell img {
+    display: block !important;
+    width: 23px !important;
+    height: 23px !important;
+    min-width: 23px !important;
+    object-fit: contain !important;
+    opacity: 1 !important;
+    filter: brightness(0) saturate(100%) invert(76%) sepia(34%) saturate(642%) hue-rotate(2deg) brightness(91%) contrast(89%) !important;
+}
+
+/* Draw clean gold line icons directly, avoiding pseudo-font and image filter failures. */
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell img {
+    display: none !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::before,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell::after {
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    box-sizing: border-box !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-list::before {
+    width: 22px !important;
+    height: 18px !important;
+    border-top: 2px solid #DDBA65 !important;
+    border-bottom: 2px solid #DDBA65 !important;
+    left: 16px !important;
+    top: 15px !important;
+    box-shadow: 0 7px 0 #DDBA65 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-list::after {
+    width: 3px !important;
+    height: 3px !important;
+    left: 11px !important;
+    top: 14px !important;
+    background: #DDBA65 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 7px 0 #DDBA65, 0 14px 0 #DDBA65 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-down::before,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-up::before {
+    width: 22px !important;
+    height: 22px !important;
+    left: 16px !important;
+    top: 13px !important;
+    border: 2px solid #DDBA65 !important;
+    border-radius: 999px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-down::after,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-up::after {
+    width: 12px !important;
+    height: 12px !important;
+    left: 21px !important;
+    top: 16px !important;
+    border-right: 2px solid #DDBA65 !important;
+    border-bottom: 2px solid #DDBA65 !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-down::after {
+    transform: rotate(45deg) !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-up::after {
+    top: 20px !important;
+    transform: rotate(225deg) !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-clock::before {
+    width: 22px !important;
+    height: 22px !important;
+    left: 16px !important;
+    top: 13px !important;
+    border: 2px solid #DDBA65 !important;
+    border-radius: 999px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-clock::after {
+    width: 8px !important;
+    height: 11px !important;
+    left: 26px !important;
+    top: 18px !important;
+    border-left: 2px solid #DDBA65 !important;
+    border-bottom: 2px solid #DDBA65 !important;
+}
+
+/* Final card balance: keep icons inside and reduce the oversized empty feeling. */
+body .transaction-kpi-card.metric-card,
+body .transaction-kpi-card.metric-card:hover {
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    grid-template-rows: 50px 36px 24px !important;
+    column-gap: 12px !important;
+    row-gap: 10px !important;
+    min-height: 154px !important;
+    padding: 18px 22px 16px 28px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-shell {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    justify-self: center !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-title {
+    font-size: 12.5px !important;
+    line-height: 1.12 !important;
+}
+
+body .transaction-kpi-card.metric-card > strong,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-positive,
+body .transaction-kpi-card.metric-card > strong.transaction-amount-negative {
+    width: min(90%, 154px) !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: clamp(20px, 1.25vw, 25px) !important;
+}
+
+body .transaction-kpi-card.metric-card > small {
+    font-size: 11.5px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-list::before {
+    left: 15px !important;
+    top: 14px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-list::after {
+    left: 10px !important;
+    top: 13px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-down::before,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-up::before,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-clock::before {
+    left: 12px !important;
+    top: 12px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-down::after,
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-up::after {
+    left: 17px !important;
+    top: 15px !important;
+}
+
+body .transaction-kpi-card.metric-card .transaction-kpi-icon.icon-clock::after {
+    left: 22px !important;
+    top: 17px !important;
+}

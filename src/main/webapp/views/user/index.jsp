@@ -102,7 +102,14 @@
         <div class="panel chart-card">
             <div class="panel-heading">
                 <h2>Total Assets Over Time</h2>
-                <span>This Month <i class="bi bi-chevron-down"></i></span>
+                <label class="chart-range-control" aria-label="Total assets range">
+                    <select class="js-chart-range" data-target="cashflowChart">
+                        <option value="month">This Month</option>
+                        <option value="quarter">Last 3 Months</option>
+                        <option value="year">This Year</option>
+                    </select>
+                    <i class="bi bi-chevron-down"></i>
+                </label>
             </div>
             <canvas id="cashflowChart" height="150"></canvas>
         </div>
